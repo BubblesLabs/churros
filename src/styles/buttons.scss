@@ -1,0 +1,17 @@
+@import "./settings.scss";
+
+button {
+  &.primary {
+    background-color: $orange;
+    padding: 10px 20px;
+    border: solid 2px transparent;
+    border-radius: 10px;
+    font-size: 1rem;
+    color: $dark-orange;
+    cursor: pointer;
+  }
+
+  &.big {
+    font-size: 1.5rem;
+  }
+}
