@@ -14,6 +14,9 @@
     const Tezos = new TezosToolkit(
       `${config.flextesaUrl}:${config.flextesaPort}`
     );
+    Tezos.setProvider({
+      config: { streamerPollingIntervalMilliseconds: 5000 }
+    });
     store.updateTezos(Tezos);
     // checks if flextesa is running
     try {

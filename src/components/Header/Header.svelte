@@ -1,16 +1,18 @@
 <script lang="ts">
+  import { location } from "svelte-spa-router";
   import DashboardIcon from "../Icons/DashboardIcon.svelte";
   import AccountsIcon from "../Icons/AccountsIcon.svelte";
   import CubeIcon from "../Icons/CubeIcon.svelte";
   import TransactionsIcon from "../Icons/TransactionsIcon.svelte";
   import SettingsIcon from "../Icons/SettingsIcon.svelte";
+  import ContractIcon from "../Icons/ContractIcon.svelte";
 </script>
 
 <style lang="scss">
   @import "../../styles/settings.scss";
 
   header {
-    background-color: $header-bg-color;
+    background-color: $black;
     color: white;
     padding: 20px;
     display: flex;
@@ -24,38 +26,75 @@
       display: flex;
       justify-content: center;
       align-items: center;
+
+      &.selected-route {
+        color: $orange;
+      }
     }
   }
 </style>
 
 <header>
   <div>
-    <a href="#/">
-      <DashboardIcon color="white" width={28} height={28} />
+    <a href="#/" class:selected-route={$location === "/"}>
+      <DashboardIcon
+        color={$location === "/" ? "#f39750" : "white"}
+        width={28}
+        height={28}
+      />
       Dashboard
     </a>
   </div>
   <div>
-    <a href="#/accounts">
-      <AccountsIcon color="white" width={28} height={28} />
+    <a href="#/accounts" class:selected-route={$location === "/accounts"}>
+      <AccountsIcon
+        color={$location === "/accounts" ? "#f39750" : "white"}
+        width={28}
+        height={28}
+      />
       Accounts
     </a>
   </div>
   <div>
-    <a href="#/blocks">
-      <CubeIcon color="white" width={28} height={28} />
+    <a href="#/blocks" class:selected-route={$location === "/blocks"}>
+      <CubeIcon
+        color={$location === "/blocks" ? "#f39750" : "white"}
+        width={28}
+        height={28}
+      />
       Blocks
     </a>
   </div>
   <div>
-    <a href="#/transactions">
-      <TransactionsIcon color="white" width={28} height={28} />
+    <a
+      href="#/transactions"
+      class:selected-route={$location === "/transactions"}
+    >
+      <TransactionsIcon
+        color={$location === "/transactions" ? "#f39750" : "white"}
+        width={28}
+        height={28}
+      />
       Transactions
     </a>
   </div>
   <div>
-    <a href="#/settings">
-      <SettingsIcon color="white" width={28} height={28} />
+    <a href="#/contracts" class:selected-route={$location === "/contracts"}>
+      <ContractIcon
+        color={$location === "/contracts" ? "#f39750" : "white"}
+        width={28}
+        height={28}
+      />
+      Contracts
+    </a>
+  </div>
+  <div>
+    <a href="#/settings" class:selected-route={$location === "/settings"}>
+      <SettingsIcon
+        color={$location === "/settings" ? "#f39750" : "white"}
+        width={28}
+        height={28}
+      />
       Settings
     </a>
   </div>

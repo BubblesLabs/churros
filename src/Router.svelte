@@ -6,6 +6,7 @@
   import Transactions from "./components/Transactions/Transactions.svelte";
   import Settings from "./components/Settings/Settings.svelte";
   import NotFound from "./NotFound.svelte";
+  import Contracts from "./components/Contracts/Contracts.svelte";
 
   const routes = {
     "/": Dashboard,
@@ -13,6 +14,7 @@
     "/blocks": Blocks,
     "/transactions": Transactions,
     "/settings": Settings,
+    "/contracts": Contracts,
     "*": NotFound
   };
 </script>

@@ -8,10 +8,10 @@
   @import "../../styles/settings.scss";
 
   header {
-    background-color: $header-bg-color;
+    background-color: $black;
     color: white;
     padding: 10px;
-    border-top: solid 2px $bg-color;
+    border-top: solid 2px $yellow;
     display: flex;
     justify-content: space-around;
     align-items: center;

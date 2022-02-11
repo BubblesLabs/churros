@@ -62,7 +62,7 @@
     <div class="blocks">
       {#each $store.blocks as block, index (block.hash)}
         <div class="block">
-          <div>{index + 1}</div>
+          <div>{$store.blocks.length - index}</div>
           <div>Level {block.header.level}</div>
           <div>{block.header.timestamp}</div>
           <div>{block.hash}</div>
