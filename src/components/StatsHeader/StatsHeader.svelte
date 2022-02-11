@@ -1,3 +1,7 @@
+<script lang="ts">
+  import config from "../../config";
+</script>
+
 <style lang="scss">
   @import "../../styles/settings.scss";
 
@@ -27,6 +31,6 @@
   </div>
   <div>
     <div>RPC address</div>
-    <div>http://localhost:20000</div>
+    <div>{config.flextesaUrl}:{config.flextesaPort}</div>
   </div>
 </header>

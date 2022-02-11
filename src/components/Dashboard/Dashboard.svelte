@@ -1,5 +1,10 @@
 <script lang="ts">
   import logo from "../../img/churros.png";
+  import store from "../../store";
+
+  const launchFlextesa = () => {
+    console.log("launching flextesa");
+  };
 </script>
 
 <style lang="scss">
@@ -29,14 +34,18 @@
 </style>
 
 <div class="dashboard">
-  <div>
-    <h1>Churros</h1>
-    <img class="logo" src={logo} alt="churros-logo" />
-    <h3>
-      <span>A local blockchain explorer</span>
-      <br />
-      <span>to test Tezos smart contracts and dapps</span>
-    </h3>
-    <button class="primary big"> Launch </button>
-  </div>
+  {#if $store.flextesaLaunched}
+    <div>Flextesa running</div>
+  {:else}
+    <div>
+      <h1>Churros</h1>
+      <img class="logo" src={logo} alt="churros-logo" />
+      <h3>
+        <span>A local blockchain explorer</span>
+        <br />
+        <span>to test Tezos smart contracts and dapps</span>
+      </h3>
+      <button class="primary big" on:click={launchFlextesa}> Launch </button>
+    </div>
+  {/if}
 </div>
