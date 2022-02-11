@@ -1,5 +1,7 @@
 <script lang="ts">
+  import store from "../../store";
   import config from "../../config";
+  import utils from "../../utils";
 </script>
 
 <style lang="scss">
@@ -26,8 +28,30 @@
 
 <header>
   <div>
+    <div>Chain ID</div>
+    <div>
+      {#if $store.chainDetails && $store.chainDetails.chainId}
+        {$store.chainDetails.chainId}
+      {:else}
+        ---
+      {/if}
+    </div>
+  </div>
+  <div>
+    <div>Protocol hash</div>
+    <div>
+      {#if $store.chainDetails && $store.chainDetails.protocolHash}
+        {utils.shortenHash($store.chainDetails.protocolHash)}
+      {:else}
+        ---
+      {/if}
+    </div>
+  </div>
+  <div>
     <div>Current level</div>
-    <div>0</div>
+    <div>
+      {$store.currentLevel ? $store.currentLevel : "---"}
+    </div>
   </div>
   <div>
     <div>RPC address</div>
