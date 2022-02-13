@@ -139,4 +139,5 @@ export interface State {
     protocolHash: string | undefined;
   };
   blocks: Array<BlockResponse>;
+  blockTime: number;
 }

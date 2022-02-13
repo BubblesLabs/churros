@@ -2,6 +2,7 @@ import { writable } from "svelte/store";
 import type { TezosToolkit } from "@taquito/taquito";
 import type { BlockResponse } from "@taquito/rpc";
 import type { State, TezosAccountAddress } from "./types";
+import config from "./config";
 
 const initialState: State = {
   currentLevel: 0,
@@ -11,7 +12,8 @@ const initialState: State = {
   blockchainLaunched: false,
   blockchainProtocol: "hangzhou",
   chainDetails: { chainId: undefined, protocolHash: undefined },
-  blocks: []
+  blocks: [],
+  blockTime: config.blockTime
 };
 
 const store = writable(initialState);

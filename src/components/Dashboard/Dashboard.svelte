@@ -1,8 +1,12 @@
 <script lang="ts">
   import store from "../../store";
+  import CubeIcon from "../Icons/CubeIcon.svelte";
+  import Modal from "../Modal/Modal.svelte";
+
+  let launchFlextesaModal = false;
 
   const launchFlextesa = () => {
-    console.log("launching flextesa");
+    launchFlextesaModal = !launchFlextesaModal;
   };
 </script>
 
@@ -29,7 +33,7 @@
     }
 
     img.logo {
-      width: 60%;
+      width: 50%;
     }
 
     .blocks {
@@ -44,14 +48,10 @@
 
       .block {
         margin: 10px 20px;
-        padding: 20px;
         width: calc(100% - 80px);
         display: grid;
         grid-template-columns: 5% 10% 20% 40% 15% 10%;
         align-items: center;
-        background-color: $dark-yellow;
-        border: solid 3px $dark-orange;
-        border-radius: 10px;
       }
     }
   }
@@ -61,8 +61,10 @@
   {#if $store.blockchainLaunched}
     <div class="blocks">
       {#each $store.blocks as block, index (block.hash)}
-        <div class="block">
-          <div>{$store.blocks.length - index}</div>
+        <div class="general-container block">
+          <div>
+            <CubeIcon color="#24292e" height={28} width={28} />
+          </div>
           <div>Level {block.header.level}</div>
           <div>{block.header.timestamp}</div>
           <div>{block.hash}</div>
@@ -90,3 +92,6 @@
     </div>
   {/if}
 </div>
+{#if launchFlextesaModal}
+  <Modal type="launch" on:close={() => (launchFlextesaModal = false)} />
+{/if}

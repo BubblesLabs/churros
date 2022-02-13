@@ -54,6 +54,10 @@
     </div>
   </div>
   <div>
+    <div>Block time</div>
+    <div>{$store.blockTime} seconds</div>
+  </div>
+  <div>
     <div>RPC address</div>
     <div>{config.flextesaUrl}:{config.flextesaPort}</div>
   </div>
