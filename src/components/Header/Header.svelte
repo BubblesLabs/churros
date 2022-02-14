@@ -31,10 +31,28 @@
         color: $orange;
       }
     }
+
+    .logo {
+      background-color: $yellow;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 5px;
+      border-radius: 50%;
+      border: solid 4px $dark-orange;
+
+      img {
+        width: 42px;
+        height: 42px;
+      }
+    }
   }
 </style>
 
 <header>
+  <div class="logo">
+    <img src="img/churros-icon-black.png" alt="logo" />
+  </div>
   <div>
     <a href="#/" class:selected-route={$location === "/"}>
       <DashboardIcon

@@ -65,7 +65,7 @@
               .map(prop => utils.objHasProperty(block, prop))
               .reduce((a, b) => a && b)
           ) {
-            console.log(block);
+            console.log(block, block.operations);
             // saves new block
             // TODO: for now, saved locally, but database should be set
             store.addNewBlock(block);

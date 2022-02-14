@@ -4,16 +4,11 @@ import type { BlockResponse } from "@taquito/rpc";
 export type TezosContractAddress = `KT1${string}`;
 export type TezosAccountAddress = `tz${"1" | "2" | "3"}${string}`;
 
-export enum OpKind {
-  Endorsement = "endorsement",
-  EndorsementWithSlot = "endorsement_with_slot",
-  Transaction = "transaction"
-}
-
 export enum Protocol {
   HANGZHOU = "hangzhou",
   ITHACA = "ithaca",
-  GRANADA = "granada"
+  GRANADA = "granada",
+  ALPHA = "alpha"
 }
 
 /*interface BlockHeader {

@@ -109,6 +109,9 @@
               case Protocol.GRANADA:
                 box = "granabox";
                 break;
+              case Protocol.ALPHA:
+                box = "alphabox";
+                break;
             }
           }}
         />

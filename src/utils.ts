@@ -7,8 +7,10 @@ const objHasProperty = (obj: any, property: string): boolean => {
   );
 };
 
-const shortenHash = (hash: string): string =>
-  hash ? hash.slice(0, 7) + "..." + hash.slice(-7) : "";
+const shortenHash = (hash: string, length_?: number): string => {
+  const length = length_ ? length_ : 7;
+  return hash ? hash.slice(0, length) + "..." + hash.slice(-length) : "";
+};
 
 const isString = (val: any): boolean => typeof val === "string";
 const isNumber = (val: any): boolean =>
