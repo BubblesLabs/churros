@@ -30,6 +30,7 @@
       border-bottom-right-radius: 10px;
       position: absolute;
       width: calc(100% - 2px);
+      margin: 0px 10px;
 
       .dropdown-list__item {
         padding: 10px 20px;

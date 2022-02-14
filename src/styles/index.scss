@@ -27,3 +27,15 @@ h1.title {
   padding: 0px;
   color: $black;
 }
+
+input[type="text"],
+input[type="number"] {
+  padding: 10px 20px;
+  margin: 0px 10px;
+  border: none;
+  border-radius: 10px;
+  background-color: $yellow;
+  outline: none;
+  font-size: 1.1rem;
+  color: $black;
+}

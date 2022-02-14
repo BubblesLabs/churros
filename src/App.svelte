@@ -5,6 +5,7 @@
   import StatsHeader from "./components/StatsHeader/StatsHeader.svelte";
   import Router from "./Router.svelte";
   import Footer from "./components/Footer/Footer.svelte";
+  import Toast from "./components/Toast/Toast.svelte";
   import store from "./store";
   import config from "./config";
   import utils from "./utils";
@@ -89,6 +90,7 @@
 </style>
 
 <main>
+  <Toast />
   <Header />
   <StatsHeader />
   <Router />

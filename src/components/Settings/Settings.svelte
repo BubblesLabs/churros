@@ -1,13 +1,44 @@
 <script lang="ts">
+  import { afterUpdate } from "svelte";
   import config from "../../config";
   import store from "../../store";
   import Dropdown from "../Dropdown/Dropdown.svelte";
   import { Protocol } from "../../types";
 
   let box = config.defaultBox;
+
+  let startFlextesaCommand = "";
+
+  const copyToClipboard = async (text: string) => {
+    if (!$store.toast.showToast) {
+      const data = [
+        new ClipboardItem({
+          "text/plain": new Blob([text], { type: "text/plain" })
+        })
+      ];
+      navigator.clipboard.write(data).then(
+        function () {
+          console.log("Copied to clipboard successfully!");
+          store.updateToast({
+            showToast: true,
+            toastText: "Command copied to clipboard"
+          });
+        },
+        function () {
+          console.error("Unable to write to clipboard. :-(");
+        }
+      );
+    }
+  };
+
+  afterUpdate(() => {
+    startFlextesaCommand = `docker run --env flextesa_node_cors_origin='*' block_time=${$store.blockTime} --rm --name ${$store.blockchainProtocol}-sandbox --detach -p 20000:20000 tqtezos/flextesa:${config.defaultImageId}  ${box} start`;
+  });
 </script>
 
 <style lang="scss">
+  @import "../../styles/settings.scss";
+
   .settings {
     display: flex;
     flex-direction: column;
@@ -17,6 +48,13 @@
     font-size: 1.1rem;
     height: calc(100% - 40px);
     overflow: auto;
+
+    h3 {
+      margin: 10px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: $black;
+    }
 
     .setting {
       width: 50%;
@@ -50,7 +88,7 @@
 <div class="settings">
   <h1 class="title">Settings</h1>
   <div class="setting general-container">
-    <div>Launch Flextesa</div>
+    <h3>Launch Flextesa</h3>
     <div class="flextesa-settings">
       <div>
         <span>Protocol:</span>
@@ -85,15 +123,22 @@
       </div>
     </div>
     <div>
-      <button class="primary">
-        {`docker run --env flextesa_node_cors_origin='*' block_time=${$store.blockTime} --rm --name ${$store.blockchainProtocol}-sandbox --detach -p 20000:20000 tqtezos/flextesa:${config.defaultImageId}  ${box} start`}
+      <button
+        class="primary"
+        on:click={() => copyToClipboard(startFlextesaCommand)}
+      >
+        {startFlextesaCommand}
       </button>
     </div>
   </div>
   <div class="setting general-container">
-    <div>Stop Flextesa</div>
+    <h3>Stop Flextesa</h3>
     <div>
-      <button class="primary">
+      <button
+        class="primary"
+        on:click={() =>
+          copyToClipboard(`docker kill ${$store.blockchainProtocol}-sandbox`)}
+      >
         {`docker kill ${$store.blockchainProtocol}-sandbox`}
       </button>
     </div>

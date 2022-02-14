@@ -146,4 +146,8 @@ export interface State {
   };
   blocks: Array<BlockResponse>;
   blockTime: number;
+  toast: {
+    showToast: boolean;
+    toastText: string;
+  };
 }

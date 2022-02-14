@@ -13,7 +13,11 @@ const initialState: State = {
   blockchainProtocol: Protocol.HANGZHOU,
   chainDetails: { chainId: undefined, protocolHash: undefined },
   blocks: [],
-  blockTime: config.blockTime
+  blockTime: config.blockTime,
+  toast: {
+    showToast: false,
+    toastText: ""
+  }
 };
 
 const store = writable(initialState);
@@ -41,6 +45,26 @@ const state = {
       ...store,
       userBalance: balance
     }));
+  },
+  updateToast: ({
+    showToast,
+    toastText
+  }: {
+    showToast: boolean;
+    toastText: string;
+  }) => {
+    store.update(store => {
+      if (showToast === true) {
+        setTimeout(
+          () => state.updateToast({ showToast: false, toastText: "" }),
+          4000
+        );
+      }
+      return {
+        ...store,
+        toast: { showToast, toastText }
+      };
+    });
   },
   updateChainDetails: ({ chainId, protocolHash }: State["chainDetails"]) => {
     store.update(store => ({
