@@ -1,7 +1,7 @@
 import { writable } from "svelte/store";
 import type { TezosToolkit } from "@taquito/taquito";
 import type { BlockResponse } from "@taquito/rpc";
-import { State, TezosAccountAddress, Protocol } from "./types";
+import { State, TezosAccountAddress, OriginationData, Protocol } from "./types";
 import config from "./config";
 
 const initialState: State = {
@@ -17,7 +17,8 @@ const initialState: State = {
   toast: {
     showToast: false,
     toastText: ""
-  }
+  },
+  contracts: []
 };
 
 const store = writable(initialState);
@@ -86,7 +87,12 @@ const state = {
         }
       }
     }),
-  resetBlocks: () => store.update(store => ({ ...store, blocks: [] }))
+  resetBlocks: () => store.update(store => ({ ...store, blocks: [] })),
+  addNewContracts: (contracts: Array<OriginationData>) =>
+    store.update(store => ({
+      ...store,
+      contracts: [...contracts, ...store.contracts]
+    }))
 };
 
 export default state;

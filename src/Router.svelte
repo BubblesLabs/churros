@@ -14,7 +14,7 @@
     "/blocks/:blockHash?": Blocks,
     "/transactions": Transactions,
     "/settings": Settings,
-    "/contracts": Contracts,
+    "/contracts/:address?": Contracts,
     "*": NotFound
   };
 </script>

@@ -11,6 +11,11 @@ export enum Protocol {
   ALPHA = "alpha"
 }
 
+export interface OriginationData {
+  address: TezosContractAddress;
+  level: number;
+}
+
 /*interface BlockHeader {
   context: string;
   fitness: Array<string>;
@@ -145,4 +150,5 @@ export interface State {
     showToast: boolean;
     toastText: string;
   };
+  contracts: Array<OriginationData>;
 }

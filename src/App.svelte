@@ -73,6 +73,11 @@
             if (utils.objHasProperty(block.header, "level")) {
               store.updateCurrentLevel(block.header.level);
             }
+            // checks for contract origination
+            const newOriginations = utils.checkForOriginationOps(block);
+            if (newOriginations.length > 0) {
+              store.addNewContracts(newOriginations);
+            }
           }
         });
         subscriber.on("error", err => {

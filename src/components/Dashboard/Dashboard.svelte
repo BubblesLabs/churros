@@ -16,29 +16,6 @@
     launchFlextesaModal = !launchFlextesaModal;
   };
 
-  const checkForOriginationOps = (
-    block: BlockResponse
-  ): Array<TezosContractAddress> => {
-    // looks for origination ops
-    const originations: Array<TezosContractAddress> = [];
-    block.operations.forEach(ops => {
-      if (ops.length > 0) {
-        ops.forEach(op => {
-          if (op.contents.length > 0) {
-            op.contents.forEach(_op => {
-              if (_op.kind === OpKind.ORIGINATION) {
-                const address = (_op as any).metadata.operation_result
-                  .originated_contracts[0];
-                originations.push(address);
-              }
-            });
-          }
-        });
-      }
-    });
-    return originations;
-  };
-
   const checkForTransactionOps = (block: BlockResponse): Array<string> => {
     // looks for origination ops
     const transactions: Array<string> = [];
@@ -138,9 +115,9 @@
               Operations: {block.operations.filter(op => op.length > 0).length}
             </div>
             <div>
-              {#if checkForOriginationOps(block).length > 0}
-                {#each checkForOriginationOps(block) as contract}
-                  <a href={`#/contracts/${contract}`}>
+              {#if $store.contracts.find(contract => contract.level === block.header.level)}
+                {#each $store.contracts.filter(contract => contract.level === block.header.level) as contract}
+                  <a href={`#/contracts/${contract.address}`}>
                     <ContractIcon color="#24292e" height={20} width={20} />
                   </a>
                 {/each}
