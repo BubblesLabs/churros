@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onMount, onDestroy } from "svelte";
   import { TezosToolkit } from "@taquito/taquito";
   import Header from "./components/Header/Header.svelte";
   import StatsHeader from "./components/StatsHeader/StatsHeader.svelte";
@@ -9,19 +9,15 @@
   import store from "./store";
   import config from "./config";
   import utils from "./utils";
+  import { Protocol } from "./types";
 
-  onMount(async () => {
-    // initializes the Tezos toolkit
-    const Tezos = new TezosToolkit(
-      `${config.flextesaUrl}:${config.flextesaPort}`
-    );
-    Tezos.setProvider({
-      config: { streamerPollingIntervalMilliseconds: 5000 }
-    });
-    store.updateTezos(Tezos);
-    // checks if flextesa is running
+  let checkIfFlextesaInterval;
+
+  const setupEnvironment = async () => {
+    if (checkIfFlextesaInterval) clearInterval(checkIfFlextesaInterval);
+
     try {
-      const header = await Tezos.rpc.getBlockHeader();
+      const header = await $store.Tezos.rpc.getBlockHeader();
       if (header) {
         // Blockchain is online
         store.updateBlockchainLaunched(true);
@@ -45,11 +41,16 @@
         } else {
           store.updateCurrentLevel(undefined);
         }
-
+        // updates Tquito polling interval
+        $store.Tezos.setProvider({
+          config: {
+            streamerPollingIntervalMilliseconds: $store.blockTime * 1000
+          }
+        });
         // subscribes to new blocks
-        const subscriber = Tezos.stream.subscribe("head");
+        const subscriber = $store.Tezos.stream.subscribe("head");
         subscriber.on("data", async blockHash => {
-          const block = await Tezos.rpc.getBlock({ block: blockHash });
+          const block = await $store.Tezos.rpc.getBlock({ block: blockHash });
           // validates block properties
           const validBlockProperties = [
             "chain_id",
@@ -74,10 +75,55 @@
             }
           }
         });
+        subscriber.on("error", err => {
+          if (err.name && err.name === "HttpRequestFailed") {
+            // Flextesa is probably not running anymore
+            store.updateChainDetails({
+              chainId: undefined,
+              protocolHash: undefined
+            });
+            store.updateCurrentLevel(undefined);
+            store.updateBlockchainLaunched(false);
+            store.updateBlockchainProtocol(Protocol.HANGZHOU);
+          }
+        });
       }
     } catch (error) {
       console.error(error);
     }
+  };
+
+  onMount(async () => {
+    // initializes the Tezos toolkit
+    const Tezos = new TezosToolkit(
+      `${config.flextesaUrl}:${config.flextesaPort}`
+    );
+    Tezos.setProvider({
+      config: { streamerPollingIntervalMilliseconds: $store.blockTime * 1000 }
+    });
+    store.updateTezos(Tezos);
+    // checks if flextesa is running
+    try {
+      // Flextesa is already running
+      await $store.Tezos.rpc.getBlockHeader();
+      await setupEnvironment();
+    } catch (error) {
+      // Flextesa is not running
+      if (error.name.includes("HttpRequestFailed")) {
+        // Flextesa is probably not running yet
+        // set an interval to check when Flextesa is started
+        checkIfFlextesaInterval = setInterval(async () => {
+          try {
+            await $store.Tezos.rpc.getBlockHeader();
+            await setupEnvironment();
+          } catch (error) {}
+        }, 3000);
+      }
+    }
+  });
+
+  onDestroy(() => {
+    clearInterval(checkIfFlextesaInterval);
   });
 </script>
 

@@ -32,7 +32,7 @@
   };
 
   afterUpdate(() => {
-    startFlextesaCommand = `docker run --env flextesa_node_cors_origin='*' block_time=${$store.blockTime} --rm --name ${$store.blockchainProtocol}-sandbox --detach -p 20000:20000 tqtezos/flextesa:${config.defaultImageId}  ${box} start`;
+    startFlextesaCommand = `docker run --rm --name ${$store.blockchainProtocol}-sandbox --detach -p 20000:20000 --env flextesa_node_cors_origin='*' --env block_time=${$store.blockTime} tqtezos/flextesa:${config.defaultImageId} ${box} start`;
   });
 </script>
 
@@ -93,6 +93,7 @@
       <div>
         <span>Protocol:</span>
         <Dropdown
+          disabled={$store.blockchainLaunched}
           selected={$store.blockchainProtocol}
           selection={Object.values(Protocol)}
           on:select={ev => {
@@ -116,9 +117,10 @@
         <span>Block time:</span>
         <input
           type="number"
-          bind:value={$store.blockTime}
-          on:change={ev => store.updateBlockTime(ev.target.value)}
-          on:input={ev => store.updateBlockTime(ev.target.value)}
+          disabled={$store.blockchainLaunched}
+          value={$store.blockTime}
+          on:change={ev => store.updateBlockTime(+ev.target.value)}
+          on:input={ev => store.updateBlockTime(+ev.target.value)}
         />
       </div>
     </div>

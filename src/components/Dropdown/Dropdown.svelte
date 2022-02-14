@@ -2,7 +2,7 @@
   import { createEventDispatcher } from "svelte";
   import { slide } from "svelte/transition";
 
-  export let selected: string, selection: Array<string>;
+  export let disabled: boolean, selected: string, selection: Array<string>;
 
   let showList = false;
   const dispatch = createEventDispatcher();
@@ -53,6 +53,7 @@
 <div class="dropdown-container">
   <button
     class="dropdown"
+    {disabled}
     class:show-list={showList}
     on:click={() => (showList = !showList)}
   >
@@ -64,9 +65,11 @@
         <div
           class="dropdown-list__item"
           on:click={() => {
-            selected = item;
-            showList = false;
-            dispatch("select", item);
+            if (!disabled) {
+              selected = item;
+              showList = false;
+              dispatch("select", item);
+            }
           }}
         >
           {capitalize(item)}
