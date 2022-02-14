@@ -1,7 +1,7 @@
 import { writable } from "svelte/store";
 import type { TezosToolkit } from "@taquito/taquito";
 import type { BlockResponse } from "@taquito/rpc";
-import type { State, TezosAccountAddress } from "./types";
+import { State, TezosAccountAddress, Protocol } from "./types";
 import config from "./config";
 
 const initialState: State = {
@@ -10,7 +10,7 @@ const initialState: State = {
   userAddress: undefined,
   userBalance: undefined,
   blockchainLaunched: false,
-  blockchainProtocol: "hangzhou",
+  blockchainProtocol: Protocol.HANGZHOU,
   chainDetails: { chainId: undefined, protocolHash: undefined },
   blocks: [],
   blockTime: config.blockTime
@@ -24,8 +24,12 @@ const state = {
     store.update(store => ({ ...store, Tezos: tezos })),
   updateBlockchainLaunched: (status: boolean) =>
     store.update(store => ({ ...store, blockchainLaunched: status })),
+  updateBlockchainProtocol: (protocol: Protocol) =>
+    store.update(store => ({ ...store, blockchainProtocol: protocol })),
   updateCurrentLevel: (level: number) =>
     store.update(store => ({ ...store, currentLevel: level })),
+  updateBlockTime: (blockTime: number) =>
+    store.update(store => ({ ...store, blockTime })),
   updateUserAddress: (address: TezosAccountAddress | undefined) => {
     store.update(store => ({
       ...store,

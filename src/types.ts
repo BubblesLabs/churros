@@ -10,6 +10,12 @@ export enum OpKind {
   Transaction = "transaction"
 }
 
+export enum Protocol {
+  HANGZHOU = "hangzhou",
+  ITHACA = "ithaca",
+  GRANADA = "granada"
+}
+
 /*interface BlockHeader {
   context: string;
   fitness: Array<string>;
@@ -130,7 +136,7 @@ export interface Block {
 export interface State {
   currentLevel: number;
   blockchainLaunched: boolean;
-  blockchainProtocol: string;
+  blockchainProtocol: Protocol;
   Tezos: TezosToolkit | undefined;
   userAddress: string | undefined;
   userBalance: number | undefined;
