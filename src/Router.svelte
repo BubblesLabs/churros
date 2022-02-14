@@ -11,7 +11,7 @@
   const routes = {
     "/": Dashboard,
     "/accounts": Accounts,
-    "/blocks": Blocks,
+    "/blocks/:blockHash?": Blocks,
     "/transactions": Transactions,
     "/settings": Settings,
     "/contracts": Contracts,

@@ -6,6 +6,9 @@ button {
   border-radius: 10px;
   cursor: pointer;
   margin: 0px 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
   &.primary {
     background-color: $orange;

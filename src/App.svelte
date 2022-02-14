@@ -85,6 +85,7 @@
             store.updateCurrentLevel(undefined);
             store.updateBlockchainLaunched(false);
             store.updateBlockchainProtocol(Protocol.HANGZHOU);
+            store.resetBlocks();
           }
         });
       }
@@ -131,7 +132,7 @@
   main {
     height: 100%;
     display: grid;
-    grid-template-rows: 8% 6% 84% 2%;
+    grid-template-rows: 8% 6% 83% 3%;
   }
 </style>
 

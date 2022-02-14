@@ -85,7 +85,8 @@ const state = {
           return { ...store, blocks: [block, ...store.blocks] };
         }
       }
-    })
+    }),
+  resetBlocks: () => store.update(store => ({ ...store, blocks: [] }))
 };
 
 export default state;

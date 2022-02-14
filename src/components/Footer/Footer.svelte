@@ -2,7 +2,12 @@
   footer {
     font-size: 0.7rem;
     text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 </style>
 
-<footer>Made by © Bubbles Labs 2022</footer>
+<footer>
+  <div>Made by © Bubbles Labs 2022</div>
+</footer>
