@@ -3,8 +3,8 @@ export default {
   flextesaPort: 20000,
   availableBoxes: ["hangzbox", "granabox", "ithacabox"],
   defaultBox: "hangzbox",
-  availableImageIds: [20210930],
-  defaultImageId: 20210930,
+  availableImageIds: [20210930, 20220127],
+  defaultImageId: 20220127,
   accounts: {
     alice: {
       pk: "edpkvGfYw3LyB1UcCahKQk4rF2tvbMUk8GFiTuMjL75uGXrpvKXhjn",

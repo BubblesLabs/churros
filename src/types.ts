@@ -16,6 +16,8 @@ export interface OriginationData {
   level: number;
 }
 
+export type TransactionData = { hash: string; level: number };
+
 /*interface BlockHeader {
   context: string;
   fitness: Array<string>;
@@ -134,6 +136,7 @@ export interface Block {
 }*/
 
 export interface State {
+  chainStatus: "running" | "not_running" | "off" | "unknown";
   currentLevel: number;
   blockchainLaunched: boolean;
   blockchainProtocol: Protocol;
@@ -151,4 +154,5 @@ export interface State {
     toastText: string;
   };
   contracts: Array<OriginationData>;
+  transactions: Array<TransactionData>;
 }

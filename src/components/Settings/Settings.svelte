@@ -32,7 +32,7 @@
   };
 
   afterUpdate(() => {
-    startFlextesaCommand = `docker run --rm --name ${$store.blockchainProtocol}-sandbox --detach -p 20000:20000 --env flextesa_node_cors_origin='*' --env block_time=${$store.blockTime} tqtezos/flextesa:${config.defaultImageId} ${box} start`;
+    startFlextesaCommand = `docker run --rm --name ${$store.blockchainProtocol}-sandbox --detach -p 20000:20000 --env flextesa_node_cors_origin='*' --env block_time=${$store.blockTime} oxheadalpha/flextesa:${config.defaultImageId} ${box} start`;
   });
 </script>
 
@@ -130,7 +130,15 @@
     <div>
       <button
         class="primary"
-        on:click={() => copyToClipboard(startFlextesaCommand)}
+        on:click={() => {
+          copyToClipboard(startFlextesaCommand);
+          // updates Taquito polling time
+          $store.Tezos.setProvider({
+            config: {
+              streamerPollingIntervalMilliseconds: $store.blockTime * 1000
+            }
+          });
+        }}
       >
         {startFlextesaCommand}
       </button>

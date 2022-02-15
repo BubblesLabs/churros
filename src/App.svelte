@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import { TezosToolkit } from "@taquito/taquito";
+  import { InMemorySigner } from "@taquito/signer";
   import Header from "./components/Header/Header.svelte";
   import StatsHeader from "./components/StatsHeader/StatsHeader.svelte";
   import Router from "./Router.svelte";
@@ -50,6 +51,7 @@
         // subscribes to new blocks
         const subscriber = $store.Tezos.stream.subscribe("head");
         subscriber.on("data", async blockHash => {
+          store.updateChainStatus("running");
           const block = await $store.Tezos.rpc.getBlock({ block: blockHash });
           // validates block properties
           const validBlockProperties = [
@@ -78,11 +80,17 @@
             if (newOriginations.length > 0) {
               store.addNewContracts(newOriginations);
             }
+            // finds new transactions
+            const newTransactions = utils.findNewTransactions(block);
+            if (newTransactions.length > 0) {
+              store.addNewTransactions(newTransactions);
+            }
           }
         });
         subscriber.on("error", err => {
           if (err.name && err.name === "HttpRequestFailed") {
             // Flextesa is probably not running anymore
+            store.updateChainStatus("not_running");
             store.updateChainDetails({
               chainId: undefined,
               protocolHash: undefined
@@ -92,6 +100,9 @@
             store.updateBlockchainProtocol(Protocol.HANGZHOU);
             store.resetBlocks();
           }
+        });
+        subscriber.off("error", err => {
+          console.error(err);
         });
       }
     } catch (error) {
@@ -105,7 +116,8 @@
       `${config.flextesaUrl}:${config.flextesaPort}`
     );
     Tezos.setProvider({
-      config: { streamerPollingIntervalMilliseconds: $store.blockTime * 1000 }
+      config: { streamerPollingIntervalMilliseconds: $store.blockTime * 1000 },
+      signer: new InMemorySigner(config.accounts.alice.sk)
     });
     store.updateTezos(Tezos);
     // checks if flextesa is running
@@ -116,6 +128,7 @@
     } catch (error) {
       // Flextesa is not running
       if (error.name.includes("HttpRequestFailed")) {
+        store.updateChainStatus("off");
         // Flextesa is probably not running yet
         // set an interval to check when Flextesa is started
         checkIfFlextesaInterval = setInterval(async () => {

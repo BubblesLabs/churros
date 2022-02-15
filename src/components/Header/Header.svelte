@@ -64,9 +64,9 @@
     </a>
   </div>
   <div>
-    <a href="#/accounts" class:selected-route={$location === "/accounts"}>
+    <a href="#/accounts" class:selected-route={$location.includes("/accounts")}>
       <AccountsIcon
-        color={$location === "/accounts" ? "#f39750" : "white"}
+        color={$location.includes("/accounts") ? "#f39750" : "white"}
         width={28}
         height={28}
       />
@@ -74,9 +74,9 @@
     </a>
   </div>
   <div>
-    <a href="#/blocks" class:selected-route={$location === "/blocks"}>
+    <a href="#/blocks" class:selected-route={$location.includes("/blocks")}>
       <CubeIcon
-        color={$location === "/blocks" ? "#f39750" : "white"}
+        color={$location.includes("/blocks") ? "#f39750" : "white"}
         width={28}
         height={28}
       />
@@ -86,10 +86,10 @@
   <div>
     <a
       href="#/transactions"
-      class:selected-route={$location === "/transactions"}
+      class:selected-route={$location.includes("/transactions")}
     >
       <TransactionsIcon
-        color={$location === "/transactions" ? "#f39750" : "white"}
+        color={$location.includes("/transactions") ? "#f39750" : "white"}
         width={28}
         height={28}
       />
@@ -97,9 +97,12 @@
     </a>
   </div>
   <div>
-    <a href="#/contracts" class:selected-route={$location === "/contracts"}>
+    <a
+      href="#/contracts"
+      class:selected-route={$location.includes("/contracts")}
+    >
       <ContractIcon
-        color={$location === "/contracts" ? "#f39750" : "white"}
+        color={$location.includes("/contracts") ? "#f39750" : "white"}
         width={28}
         height={28}
       />

@@ -28,47 +28,12 @@
 </script>
 
 <style lang="scss">
-  @import "../../styles/settings.scss";
-
-  .contracts-container {
-    width: 100%;
-    height: 100%;
-    display: grid;
-    grid-template-columns: 30% 70%;
-
-    .contracts-menu {
-      height: 100%;
-      overflow: hidden;
-
-      .selected-contract {
-        margin: 10px auto;
-      }
-
-      .contracts-list {
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-start;
-        align-items: flex-start;
-        overflow: auto;
-
-        & > button {
-          margin: 10px;
-          width: calc(100% - 20px);
-        }
-      }
-    }
-
-    .contract-details {
-      overflow: auto;
-      padding: 20px;
-    }
-  }
 </style>
 
-<div class="contracts-container">
-  <div class="contracts-menu">
+<div class="data-display-container">
+  <div class="data-display-menu">
     {#if selectedContract && $store.contracts.find(contract => contract.address === selectedContract)}
-      <button class="primary selected-contract" disabled>
+      <button class="primary selected-data-display" disabled>
         <ContractIcon color="white" width={24} height={24} />
         {utils.shortenHash(selectedContract)} (level {$store.contracts.find(
           contract => contract.address === selectedContract
@@ -77,7 +42,7 @@
       <div class="separator" />
     {/if}
     <div
-      class="contracts-list"
+      class="data-display-list"
       style={selectedContract &&
       $store.contracts.find(contract => contract.address === selectedContract)
         ? "height:90%"
@@ -115,7 +80,7 @@
       {/each}
     </div>
   </div>
-  <div class="contract-details">
+  <div class="data-display-details">
     {#if selectedContract}
       <h3>Contract {selectedContract}</h3>
       <div>

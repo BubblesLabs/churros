@@ -17,47 +17,12 @@
 </script>
 
 <style lang="scss">
-  @import "../../styles/settings.scss";
-
-  .blocks-container {
-    width: 100%;
-    height: 100%;
-    display: grid;
-    grid-template-columns: 30% 70%;
-
-    .blocks-menu {
-      height: 100%;
-      overflow: hidden;
-
-      .selected-block {
-        margin: 10px auto;
-      }
-
-      .blocks-list {
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-start;
-        align-items: flex-start;
-        overflow: auto;
-
-        & > button {
-          margin: 10px;
-          width: calc(100% - 20px);
-        }
-      }
-    }
-
-    .block-details {
-      overflow: auto;
-      padding: 20px;
-    }
-  }
 </style>
 
-<div class="blocks-container">
-  <div class="blocks-menu">
+<div class="data-display-container">
+  <div class="data-display-menu">
     {#if selectedBlock && $store.blocks.find(block => block.hash === selectedBlock)}
-      <button class="primary selected-block" disabled>
+      <button class="primary selected-data-display" disabled>
         <CubeIcon color="white" width={24} height={24} />
         {utils.shortenHash(selectedBlock)} (level {$store.blocks.find(
           block => block.hash === selectedBlock
@@ -66,7 +31,7 @@
       <div class="separator" />
     {/if}
     <div
-      class="blocks-list"
+      class="data-display-list"
       style={selectedBlock &&
       $store.blocks.find(block => block.hash === selectedBlock)
         ? "height:90%"
@@ -90,7 +55,7 @@
       {/each}
     </div>
   </div>
-  <div class="block-details">
+  <div class="data-display-details">
     {#if selectedBlock}
       <h3>Block {selectedBlock}</h3>
       <div>

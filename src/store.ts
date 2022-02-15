@@ -1,10 +1,17 @@
 import { writable } from "svelte/store";
 import type { TezosToolkit } from "@taquito/taquito";
 import type { BlockResponse } from "@taquito/rpc";
-import { State, TezosAccountAddress, OriginationData, Protocol } from "./types";
+import {
+  State,
+  TezosAccountAddress,
+  OriginationData,
+  Protocol,
+  TransactionData
+} from "./types";
 import config from "./config";
 
 const initialState: State = {
+  chainStatus: "unknown",
   currentLevel: 0,
   Tezos: undefined,
   userAddress: undefined,
@@ -18,7 +25,8 @@ const initialState: State = {
     showToast: false,
     toastText: ""
   },
-  contracts: []
+  contracts: [],
+  transactions: []
 };
 
 const store = writable(initialState);
@@ -33,6 +41,8 @@ const state = {
     store.update(store => ({ ...store, blockchainProtocol: protocol })),
   updateCurrentLevel: (level: number) =>
     store.update(store => ({ ...store, currentLevel: level })),
+  updateChainStatus: (status: State["chainStatus"]) =>
+    store.update(store => ({ ...store, chainStatus: status })),
   updateBlockTime: (blockTime: number) =>
     store.update(store => ({ ...store, blockTime })),
   updateUserAddress: (address: TezosAccountAddress | undefined) => {
@@ -92,7 +102,21 @@ const state = {
     store.update(store => ({
       ...store,
       contracts: [...contracts, ...store.contracts]
-    }))
+    })),
+  addNewTransactions: (transactions: Array<TransactionData>) =>
+    store.update(store => {
+      if (store.transactions.length < 100) {
+        return {
+          ...store,
+          transactions: [...transactions, ...store.transactions]
+        };
+      } else {
+        // remove the last element of the array
+        const newTxsStore = store.transactions.slice(transactions.length);
+
+        return { ...store, transactions: [...transactions, ...newTxsStore] };
+      }
+    })
 };
 
 export default state;

@@ -28,6 +28,22 @@
 
 <header>
   <div>
+    <div>Chain status</div>
+    <div>
+      {#if $store.chainStatus === "not_running"}
+        <span style="color:red">Not running</span>
+      {:else if $store.chainStatus === "running"}
+        <span style="color:lime">Running</span>
+      {:else if $store.chainStatus === "off"}
+        Off
+      {:else if $store.chainStatus === "unknown"}
+        Unknown
+      {:else}
+        {$store.chainStatus}
+      {/if}
+    </div>
+  </div>
+  <div>
     <div>Chain ID</div>
     <div>
       {#if $store.chainDetails && $store.chainDetails.chainId}

@@ -12,7 +12,7 @@
     "/": Dashboard,
     "/accounts": Accounts,
     "/blocks/:blockHash?": Blocks,
-    "/transactions": Transactions,
+    "/transactions/:transaction?": Transactions,
     "/settings": Settings,
     "/contracts/:address?": Contracts,
     "*": NotFound

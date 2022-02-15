@@ -1,6 +1,10 @@
 import type { BlockResponse } from "@taquito/rpc";
 import { OpKind } from "@taquito/taquito";
-import type { TezosContractAddress, OriginationData } from "./types";
+import type {
+  TezosContractAddress,
+  OriginationData,
+  TransactionData
+} from "./types";
 
 const objHasProperty = (obj: any, property: string): boolean => {
   return (
@@ -28,7 +32,6 @@ const checkForOriginationOps = (
   block.operations.forEach(ops => {
     if (ops.length > 0) {
       ops.forEach(op => {
-        console.log(op);
         if (op.contents.length > 0) {
           op.contents.forEach(_op => {
             if (_op.kind === OpKind.ORIGINATION) {
@@ -44,10 +47,19 @@ const checkForOriginationOps = (
   return originations;
 };
 
+const findNewTransactions = (block: BlockResponse): Array<TransactionData> => {
+  return block.operations
+    .map(arrOp =>
+      arrOp.map(op => ({ hash: op.hash, level: block.header.level }))
+    )
+    .flat();
+};
+
 export default {
   objHasProperty,
   shortenHash,
   isString,
   isNumber,
-  checkForOriginationOps
+  checkForOriginationOps,
+  findNewTransactions
 };
