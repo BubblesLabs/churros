@@ -34,6 +34,8 @@
         <span style="color:red">Not running</span>
       {:else if $store.chainStatus === "running"}
         <span style="color:lime">Running</span>
+      {:else if $store.chainStatus === "idle"}
+        <span style="color:yellow">Idle</span>
       {:else if $store.chainStatus === "off"}
         Off
       {:else if $store.chainStatus === "unknown"}
@@ -71,7 +73,15 @@
   </div>
   <div>
     <div>Block time</div>
-    <div>{$store.blockTime} seconds</div>
+    <div>
+      {#if !$store.blockTime}
+        <span>---</span>
+      {:else if $store.blockTime < 60_000 * 60}
+        {$store.blockTime} seconds
+      {:else}
+        <span>> 1 hour</span>
+      {/if}
+    </div>
   </div>
   <div>
     <div>RPC address</div>

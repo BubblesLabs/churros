@@ -1,13 +1,17 @@
 <script lang="ts">
+  import { MichelsonMap } from "@taquito/taquito";
   import { afterUpdate } from "svelte";
   import config from "../../config";
   import store from "../../store";
   import Dropdown from "../Dropdown/Dropdown.svelte";
   import { Protocol } from "../../types";
+  import mockHarbingerCode from "./mockHarbingerCode";
 
   let box = config.defaultBox;
 
   let startFlextesaCommand = "";
+  let mockHarbingerValues = "XTZ-USD=5.67;BTC-USD=45000;ETH-USD=2876";
+  let originatingOracle = false;
 
   const copyToClipboard = async (text: string) => {
     if (!$store.toast.showToast) {
@@ -31,7 +35,43 @@
     }
   };
 
-  afterUpdate(() => {
+  const originateMockHarbinger = async () => {
+    originatingOracle = true;
+    try {
+      // parses input values
+      const oracleValues = mockHarbingerValues
+        .split(";")
+        .filter(entry => {
+          const regex = new RegExp("[A-Z]{3,}-[A-Z]{3,}=[0-9\\.]*");
+          return regex.test(entry);
+        })
+        .map(entry => entry.split("="));
+      // originates the oracle
+      if (oracleValues.length > 0) {
+        const storage = new MichelsonMap();
+        oracleValues.forEach(val => {
+          if (!isNaN(+val[1])) {
+            storage.set(val[0], {
+              0: new Date().toISOString(),
+              1: Math.round(+val[1] * 10 ** 6)
+            });
+          }
+        });
+
+        const originateOp = await $store.Tezos.contract.originate({
+          code: mockHarbingerCode,
+          storage
+        });
+        await originateOp.confirmation();
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      originatingOracle = false;
+    }
+  };
+
+  afterUpdate(async () => {
     startFlextesaCommand = `docker run --rm --name ${$store.blockchainProtocol}-sandbox --detach -p 20000:20000 --env flextesa_node_cors_origin='*' --env block_time=${$store.blockTime} oxheadalpha/flextesa:${config.defaultImageId} ${box} start`;
   });
 </script>
@@ -58,7 +98,7 @@
 
     .setting {
       width: 50%;
-      margin: 40px;
+      margin: 10px;
       text-align: center;
       display: flex;
       flex-direction: column;
@@ -153,6 +193,25 @@
           copyToClipboard(`docker kill ${$store.blockchainProtocol}-sandbox`)}
       >
         {`docker kill ${$store.blockchainProtocol}-sandbox`}
+      </button>
+    </div>
+  </div>
+  <div class="setting general-container">
+    <h3>Originate Mock Harbinger</h3>
+    <div>
+      Originate a contract that mimics Harbinger's Normalizer contract to fetch
+      currency pair prices on-chain.
+    </div>
+    <div style="width:100%">
+      <input type="text" style="width:70%" bind:value={mockHarbingerValues} />
+    </div>
+    <div>
+      <button class="primary" on:click={originateMockHarbinger}>
+        {#if originatingOracle}
+          Originating...
+        {:else}
+          Originate
+        {/if}
       </button>
     </div>
   </div>

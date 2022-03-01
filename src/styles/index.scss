@@ -78,5 +78,13 @@ input[type="number"] {
   .data-display-details {
     overflow: auto;
     padding: 20px;
+
+    .data-display-details__info {
+      padding-left: 20px;
+      display: grid;
+      grid-template-columns: 30% 70%;
+      grid-gap: 10px;
+      word-break: break-all;
+    }
   }
 }

@@ -136,7 +136,7 @@ export interface Block {
 }*/
 
 export interface State {
-  chainStatus: "running" | "not_running" | "off" | "unknown";
+  chainStatus: "running" | "not_running" | "idle" | "off" | "unknown";
   currentLevel: number;
   blockchainLaunched: boolean;
   blockchainProtocol: Protocol;
@@ -155,4 +155,18 @@ export interface State {
   };
   contracts: Array<OriginationData>;
   transactions: Array<TransactionData>;
+}
+
+export interface ContractSessionStorage {
+  [p: TezosContractAddress]: {
+    origination: {
+      level: number;
+      storage: any;
+    };
+    updates: Array<{
+      level: number;
+      previousStorage: any;
+      currentStorage: any;
+    }>;
+  };
 }

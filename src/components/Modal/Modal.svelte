@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
+  import { createEventDispatcher, onMount } from "svelte";
   import { fly, fade } from "svelte/transition";
   import store from "../../store";
   import config from "../../config";
@@ -7,6 +7,33 @@
   export let type: "default" | "launch";
 
   const dispatch = createEventDispatcher();
+  let launchFlextesaCommand = "";
+
+  const copyToClipboard = async (text: string) => {
+    if (!$store.toast.showToast) {
+      const data = [
+        new ClipboardItem({
+          "text/plain": new Blob([text], { type: "text/plain" })
+        })
+      ];
+      navigator.clipboard.write(data).then(
+        function () {
+          console.log("Copied to clipboard successfully!");
+          store.updateToast({
+            showToast: true,
+            toastText: "Command copied to clipboard"
+          });
+        },
+        function () {
+          console.error("Unable to write to clipboard. :-(");
+        }
+      );
+    }
+  };
+
+  onMount(() => {
+    launchFlextesaCommand = `docker run --rm --name ${$store.blockchainProtocol}-sandbox --detach -p 20000:20000 --env flextesa_node_cors_origin='*' --env block_time=${$store.blockTime} oxheadalpha/flextesa:${config.defaultImageId} ${config.defaultBox} start`;
+  });
 </script>
 
 <style lang="scss">
@@ -30,8 +57,10 @@
     top: 0px;
     display: grid;
     place-items: center;
+    z-index: 100;
 
     .modal-container {
+      position: relative;
       color: $black;
       background-color: lighten($yellow, 10);
       border: solid 3px $dark-orange;
@@ -43,6 +72,7 @@
       flex-direction: column;
       justify-content: space-around;
       align-items: center;
+      z-index: 110;
     }
   }
 </style>
@@ -67,8 +97,11 @@
         (For more customization options of Flextesa, go to
         <a href="#/settings">Settings</a>.)
       </div>
-      <button class="primary">
-        {`docker run --env flextesa_node_cors_origin='*' --rm --name ${$store.blockchainProtocol}-sandbox --detach -p 20000:20000 tqtezos/flextesa:${config.defaultImageId}  ${config.defaultBox} start`}
+      <button
+        class="primary"
+        on:click={() => copyToClipboard(launchFlextesaCommand)}
+      >
+        {launchFlextesaCommand}
       </button>
     {:else}
       Default modal

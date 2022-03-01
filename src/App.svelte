@@ -8,11 +8,13 @@
   import Footer from "./components/Footer/Footer.svelte";
   import Toast from "./components/Toast/Toast.svelte";
   import store from "./store";
+  import contractsStore from "./contractsStore";
   import config from "./config";
   import utils from "./utils";
   import { Protocol } from "./types";
 
   let checkIfFlextesaInterval;
+  let checkIfRunningInterval;
 
   const setupEnvironment = async () => {
     if (checkIfFlextesaInterval) clearInterval(checkIfFlextesaInterval);
@@ -68,6 +70,30 @@
               .reduce((a, b) => a && b)
           ) {
             console.log(block, block.operations);
+            // validates protocol
+            const protocol = block.metadata.protocol;
+            if (protocol.includes("ithaca")) {
+              store.updateBlockchainProtocol(Protocol.ITHACA);
+            } else if (protocol.includes("hangz")) {
+              store.updateBlockchainProtocol(Protocol.HANGZHOU);
+            } else if (protocol.includes("granada")) {
+              store.updateBlockchainProtocol(Protocol.GRANADA);
+            }
+            // calculates actual block time
+            if ($store.blocks.length > 0) {
+              const lastBlockTimestamp = new Date(
+                $store.blocks[0].header.timestamp
+              ).getTime();
+              const newBlockTimestamp = new Date(
+                block.header.timestamp
+              ).getTime();
+              const actualBlockTime = newBlockTimestamp - lastBlockTimestamp;
+              store.updateBlockTime(actualBlockTime / 1000);
+              if (actualBlockTime > 120_000) {
+                // shows idle status
+                store.updateChainStatus("idle");
+              }
+            }
             // saves new block
             // TODO: for now, saved locally, but database should be set
             store.addNewBlock(block);
@@ -79,6 +105,10 @@
             const newOriginations = utils.checkForOriginationOps(block);
             if (newOriginations.length > 0) {
               store.addNewContracts(newOriginations);
+              contractsStore.addNewContract(
+                newOriginations[0].address,
+                newOriginations[0].level
+              );
             }
             // finds new transactions
             const newTransactions = utils.findNewTransactions(block);
@@ -99,10 +129,14 @@
             store.updateBlockchainLaunched(false);
             store.updateBlockchainProtocol(Protocol.HANGZHOU);
             store.resetBlocks();
+            contractsStore.reset();
           }
         });
         subscriber.off("error", err => {
-          console.error(err);
+          console.error("Taquito subscriber error:", err);
+        });
+        subscriber.on("close", () => {
+          console.log("Taquito subscriber closed");
         });
       }
     } catch (error) {
@@ -139,10 +173,24 @@
         }, 3000);
       }
     }
+    // checks every hour if the blockchain is still running
+    checkIfRunningInterval = setInterval(() => {
+      if ($store.blocks && $store.blocks.length > 0) {
+        const lastTimestamp = new Date(
+          $store.blocks[0].header.timestamp
+        ).getTime();
+        if (Date.now() > lastTimestamp + 60_000 * 60) {
+          // no new block has come for one hour
+          store.updateChainStatus("idle");
+          store.updateBlockTime(60_000 * 60);
+        }
+      }
+    });
   });
 
   onDestroy(() => {
     clearInterval(checkIfFlextesaInterval);
+    clearInterval(checkIfRunningInterval);
   });
 </script>
 
