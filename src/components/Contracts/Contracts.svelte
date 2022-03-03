@@ -91,12 +91,12 @@
 
 <div class="data-display-container">
   <div class="data-display-menu">
-    {#if selectedContract && $store.contracts.find(contract => contract.address === selectedContract)}
+    {#if selectedContract && Object.entries($contractsStore).find(([addr, _]) => addr === selectedContract)}
       <button class="primary selected-data-display" disabled>
         <ContractIcon color="white" width={24} height={24} />
-        {utils.shortenHash(selectedContract)} (level {$store.contracts.find(
-          contract => contract.address === selectedContract
-        ).level})
+        {utils.shortenHash(selectedContract)} (level {Object.entries(
+          $contractsStore
+        ).find(([addr, _]) => addr === selectedContract)[1].origination.level})
       </button>
       <div class="separator" />
     {/if}
@@ -176,8 +176,10 @@
             </div>
           {/each}
         </div>
-      {:else if $store.contracts.length > 0}
+      {:else if Object.keys($contractsStore).length > 0}
         <div>Select a contract to display its data</div>
+      {:else}
+        <div>No contract to display yet</div>
       {/if}
     </div>
   </div>
