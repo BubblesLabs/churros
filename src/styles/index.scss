@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap");
 @import "./settings.scss";
 @import "./buttons.scss";
 
@@ -12,6 +13,7 @@ body {
   margin: 0px;
   color: $black;
   font-size: 1rem;
+  font-family: "Space Mono", monospace;
 }
 
 .general-container {
@@ -38,6 +40,44 @@ input[type="number"] {
   outline: none;
   font-size: 1.1rem;
   color: $black;
+}
+
+.input-with-button {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  font-size: 1rem;
+
+  input {
+    margin: 0px;
+    padding: 10px 20px;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+    border-top-right-radius: 0px;
+    border-bottom-right-radius: 0px;
+  }
+
+  button {
+    margin: 0px;
+    padding: 10px 20px;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    border-top-left-radius: 0px;
+    border-bottom-left-radius: 0px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: $orange;
+    border: none;
+    color: $dark-orange;
+    transition: 0.3s;
+
+    &:hover {
+      background-color: darken($orange, 10);
+      color: darken($dark-orange, 10);
+    }
+  }
 }
 
 .separator {
@@ -80,7 +120,7 @@ input[type="number"] {
     padding: 20px;
 
     .data-display-details__info {
-      padding-left: 20px;
+      padding: 10px 0px 0px 20px;
       display: grid;
       grid-template-columns: 30% 70%;
       grid-gap: 10px;

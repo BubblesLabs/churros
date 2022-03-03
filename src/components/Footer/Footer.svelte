@@ -21,7 +21,7 @@
 
 <footer>
   <div />
-  <div>Made by © Bubbles Labs 2022</div>
+  <div>Made by ©Bubbles Labs 2022</div>
   <div>
     <a
       href="https://github.com/BubblesLabs/churros"

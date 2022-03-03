@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import { fly } from "svelte/transition";
   import { BigMapAbstraction } from "@taquito/taquito";
+  import BigNumber from "bignumber.js";
   import store from "../../store";
   import contractsStore from "../../contractsStore";
   import utils from "../../utils";
@@ -11,21 +12,54 @@
 
   let selectedContract = "";
   let selectedContractStorage: Array<{ name: string; value: any }> = [];
+  let bigmapSearchResults = {};
 
   const parseStorage = (storage: any) => {
     Object.entries(storage).forEach(([name, value]) => {
       // bigmap
       if (value instanceof BigMapAbstraction) {
         value = "bigmap";
+        bigmapSearchResults[name] = {
+          search: "",
+          result: undefined
+        };
       }
       // set
       if (Array.isArray(value)) {
         value = `[ ${value.map(v => v)} ]`;
       }
+      // potentially big number
+      if (BigNumber.isBigNumber(value)) {
+        value = value.toNumber().toLocaleString();
+      }
 
       const entry = { name, value };
       selectedContractStorage = [entry, ...selectedContractStorage];
     });
+  };
+
+  const searchBigMap = async (bigmapName: string) => {
+    if (bigmapSearchResults.hasOwnProperty(bigmapName)) {
+      const contract = await $store.Tezos.contract.at(selectedContract);
+      const contractStorage = await contract.storage();
+      const { search } = bigmapSearchResults[bigmapName];
+      let bigmapKey;
+      if (search.includes("/")) {
+        // creates a pair for the bigmap key
+        const pairItems = search.split("/");
+        bigmapKey = { 0: pairItems[0], 1: pairItems[1] };
+      } else {
+        bigmapKey = search;
+      }
+      const result = await contractStorage[bigmapName].get(bigmapKey);
+      if (result && BigNumber.isBigNumber(result)) {
+        bigmapSearchResults[bigmapName].result = result.toNumber();
+      } else if (result && !BigNumber.isBigNumber(result)) {
+        bigmapSearchResults[bigmapName].result = JSON.stringify(result);
+      } else {
+        bigmapSearchResults[bigmapName].result = "no result";
+      }
+    }
   };
 
   onMount(async () => {
@@ -47,6 +81,12 @@
 </script>
 
 <style lang="scss">
+  .contract-details-container {
+    $v-padding: 30px;
+    padding: $v-padding 40px;
+    height: calc(100% - #{$v-padding} * 2);
+    overflow: auto;
+  }
 </style>
 
 <div class="data-display-container">
@@ -98,19 +138,47 @@
       {/each}
     </div>
   </div>
-  <div class="data-display-details">
-    {#if selectedContract && selectedContractStorage}
-      <h3>Contract {selectedContract}</h3>
-      <div>
-        {#each selectedContractStorage as entry}
-          <div class="data-display-details__info" style="margin-bottom:10px">
-            <div>{entry.name}</div>
-            <div>{entry.value}</div>
-          </div>
-        {/each}
-      </div>
-    {:else if $store.contracts.length > 0}
-      <div>Select a contract to display its data</div>
-    {/if}
+  <div class="contract-details-container">
+    <div class="general-container data-display-details">
+      {#if selectedContract && selectedContractStorage}
+        <h3>Contract {selectedContract}</h3>
+        <div>
+          {#each selectedContractStorage as entry}
+            <div class="data-display-details__info" style="margin-bottom:10px">
+              <div>{entry.name}</div>
+              <div>
+                {#if entry.value === "bigmap"}
+                  <div>big_map</div>
+                  <div>Find a value by key:</div>
+                  <div class="input-with-button">
+                    <input
+                      type="text"
+                      placeholder="Big_map key"
+                      bind:value={bigmapSearchResults[entry.name].search}
+                    />
+                    <button
+                      on:click={async () => await searchBigMap(entry.name)}
+                    >
+                      Search
+                    </button>
+                  </div>
+                  <div>
+                    {#if bigmapSearchResults[entry.name] && bigmapSearchResults[entry.name].result}
+                      {bigmapSearchResults[entry.name].result}
+                    {:else}
+                      &nbsp;
+                    {/if}
+                  </div>
+                {:else}
+                  {entry.value}
+                {/if}
+              </div>
+            </div>
+          {/each}
+        </div>
+      {:else if $store.contracts.length > 0}
+        <div>Select a contract to display its data</div>
+      {/if}
+    </div>
   </div>
 </div>
