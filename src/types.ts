@@ -153,7 +153,6 @@ export interface State {
     showToast: boolean;
     toastText: string;
   };
-  contracts: Array<OriginationData>;
   transactions: Array<TransactionData>;
 }
 

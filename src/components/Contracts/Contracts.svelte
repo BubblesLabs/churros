@@ -25,9 +25,9 @@
         };
       }
       // set
-      if (Array.isArray(value)) {
+      /*if (Array.isArray(value)) {
         value = `[ ${value.map(v => v)} ]`;
-      }
+      }*/
       // potentially big number
       if (BigNumber.isBigNumber(value)) {
         value = value.toNumber().toLocaleString();
@@ -103,7 +103,9 @@
     <div
       class="data-display-list"
       style={selectedContract &&
-      $store.contracts.find(contract => contract.address === selectedContract)
+      Object.entries($contractsStore).find(
+        ([address, _]) => address === selectedContract
+      )
         ? "height:90%"
         : "height:100%"}
     >
@@ -169,6 +171,10 @@
                       &nbsp;
                     {/if}
                   </div>
+                {:else if Array.isArray(entry.value)}
+                  {#each entry.value as item, index}
+                    <div>{index}- {item}</div>
+                  {/each}
                 {:else}
                   {entry.value}
                 {/if}

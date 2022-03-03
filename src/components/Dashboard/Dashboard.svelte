@@ -3,6 +3,7 @@
   import { OpKind } from "@taquito/taquito";
   import type { BlockResponse } from "@taquito/rpc";
   import store from "../../store";
+  import contractsStore from "../../contractsStore";
   import CubeIcon from "../Icons/CubeIcon.svelte";
   import ContractIcon from "../Icons/ContractIcon.svelte";
   import TransactionsIcon from "../Icons/TransactionsIcon.svelte";
@@ -115,8 +116,8 @@
               Operations: {block.operations.filter(op => op.length > 0).length}
             </div>
             <div>
-              {#if $store.contracts.find(contract => contract.level === block.header.level)}
-                {#each $store.contracts.filter(contract => contract.level === block.header.level) as contract}
+              {#if Object.entries($contractsStore).find(([_, contract]) => contract.origination.level === block.header.level)}
+                {#each Object.entries($contractsStore).find(([_, contract]) => contract.origination.level === block.header.level) as contract}
                   <a href={`#/contracts/${contract.address}`}>
                     <ContractIcon color="#24292e" height={20} width={20} />
                   </a>

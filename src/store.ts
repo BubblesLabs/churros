@@ -25,7 +25,6 @@ const initialState: State = {
     showToast: false,
     toastText: ""
   },
-  contracts: [],
   transactions: []
 };
 
@@ -98,11 +97,6 @@ const state = {
       }
     }),
   resetBlocks: () => store.update(store => ({ ...store, blocks: [] })),
-  addNewContracts: (contracts: Array<OriginationData>) =>
-    store.update(store => ({
-      ...store,
-      contracts: [...contracts, ...store.contracts]
-    })),
   addNewTransactions: (transactions: Array<TransactionData>) =>
     store.update(store => {
       if (store.transactions.length < 100) {

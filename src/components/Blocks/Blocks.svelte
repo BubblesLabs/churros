@@ -19,13 +19,24 @@
 
   onMount(() => {
     if ($store.blocks && $store.blocks.length > 0 && params.blockHash) {
-      const block = $store.blocks.find(block => block.hash === params.hash);
+      const block = $store.blocks.find(
+        block => block.hash === params.blockHash
+      );
       if (block) {
         selectedBlock = block;
       }
     }
   });
 </script>
+
+<style lang="scss">
+  .block-details-container {
+    $v-padding: 30px;
+    padding: $v-padding 40px;
+    height: calc(100% - #{$v-padding} * 2);
+    overflow: auto;
+  }
+</style>
 
 <div class="data-display-container">
   <div class="data-display-menu">
@@ -61,34 +72,36 @@
       {/each}
     </div>
   </div>
-  <div class="data-display-details">
-    {#if selectedBlock}
-      <h3>Block {selectedBlock.hash}</h3>
-      <div>
-        <h4>Chain ID</h4>
-        <div class="data-display-details__info">{selectedBlock.chain_id}</div>
-        <h4>Header</h4>
-        <div class="data-display-details__info">
-          {#each parseBlockInfo(selectedBlock.header) as item}
-            <div>{item.title}</div>
-            <div>{item.info}</div>
-          {/each}
+  <div class="block-details-container">
+    <div class="general-container data-display-details">
+      {#if selectedBlock}
+        <h3>Block {selectedBlock.hash}</h3>
+        <div>
+          <h4>Chain ID</h4>
+          <div class="data-display-details__info">{selectedBlock.chain_id}</div>
+          <h4>Header</h4>
+          <div class="data-display-details__info">
+            {#each parseBlockInfo(selectedBlock.header) as item}
+              <div>{item.title}</div>
+              <div>{item.info}</div>
+            {/each}
+          </div>
+          <h4>Metadata</h4>
+          <div class="data-display-details__info">
+            <pre>
+              {JSON.stringify(selectedBlock.metadata, null, 2)}
+          </pre>
+          </div>
+          <h4>Operations</h4>
+          <div class="data-display-details__info">
+            <pre>
+              {JSON.stringify(selectedBlock.operations, null, 2)}
+          </pre>
+          </div>
         </div>
-        <h4>Metadata</h4>
-        <div class="data-display-details__info">
-          <pre>
-            {JSON.stringify(selectedBlock.metadata, null, 2)}
-        </pre>
-        </div>
-        <h4>Operations</h4>
-        <div class="data-display-details__info">
-          <pre>
-            {JSON.stringify(selectedBlock.operations, null, 2)}
-        </pre>
-        </div>
-      </div>
-    {:else}
-      <div>Select a block to display its data</div>
-    {/if}
+      {:else}
+        <div>Select a block to display its data</div>
+      {/if}
+    </div>
   </div>
 </div>
