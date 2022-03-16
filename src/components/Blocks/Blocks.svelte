@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { BlockResponse, BlockFullHeader } from "@taquito/rpc";
-  import { onMount } from "svelte";
+  import { onMount, afterUpdate } from "svelte";
   import { fly } from "svelte/transition";
   import store from "../../store";
   import utils from "../../utils";
@@ -9,6 +9,7 @@
   export let params;
 
   let selectedBlock: BlockResponse;
+  let originatedContracts = [];
 
   const parseBlockInfo = (
     info: BlockFullHeader
@@ -19,11 +20,27 @@
 
   onMount(() => {
     if ($store.blocks && $store.blocks.length > 0 && params.blockHash) {
+      console.log($store.blocks);
       const block = $store.blocks.find(
         block => block.hash === params.blockHash
       );
       if (block) {
         selectedBlock = block;
+      } else {
+        store.updateToast({
+          showToast: true,
+          toastText: `Cannot find block ${utils.shortenHash(params.blockHash)}`
+        });
+      }
+    }
+  });
+
+  afterUpdate(() => {
+    // checks for originated contract
+    if (selectedBlock) {
+      const originationRes = utils.checkForOriginationOps(selectedBlock);
+      if (originationRes && originationRes.length > 0) {
+        originatedContracts = [...originationRes];
       }
     }
   });
@@ -56,7 +73,10 @@
         <button
           class="primary"
           transition:fly|local={{ duration: 300, y: -300 }}
-          on:click={() => (selectedBlock = block)}
+          on:click={() => {
+            window.history.replaceState({}, "", `/#/blocks/${block.hash}`);
+            selectedBlock = block;
+          }}
         >
           <CubeIcon
             color={selectedBlock && block.hash === selectedBlock.hash
@@ -86,11 +106,32 @@
               <div>{item.info}</div>
             {/each}
           </div>
+          {#if originatedContracts.length > 0}
+            <h4>Originated contracts</h4>
+            <div class="data-display-details__info">
+              {#each originatedContracts as contract}
+                <div />
+                <div>
+                  <a href={`#/contracts/${contract.address}`}>
+                    {contract.address}
+                  </a>
+                </div>
+              {/each}
+            </div>
+          {/if}
           <h4>Metadata</h4>
           <div class="data-display-details__info">
+            <!--
             <pre>
               {JSON.stringify(selectedBlock.metadata, null, 2)}
-          </pre>
+            </pre>
+            -->
+            {#each Object.entries(selectedBlock.metadata) as [metadataKey, metadataValue]}
+              <div>{metadataKey}</div>
+              <div>
+                {JSON.stringify(metadataValue, null, 2)}
+              </div>
+            {/each}
           </div>
           <h4>Operations</h4>
           <div class="data-display-details__info">

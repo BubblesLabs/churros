@@ -104,7 +104,6 @@
             // checks for contract origination
             const newOriginations = utils.checkForOriginationOps(block);
             if (newOriginations.length > 0) {
-              store.addNewContracts(newOriginations);
               contractsStore.addNewContract(
                 newOriginations[0].address,
                 newOriginations[0].level
@@ -164,13 +163,6 @@
       if (error.name.includes("HttpRequestFailed")) {
         store.updateChainStatus("off");
         // Flextesa is probably not running yet
-        // set an interval to check when Flextesa is started
-        checkIfFlextesaInterval = setInterval(async () => {
-          try {
-            await $store.Tezos.rpc.getBlockHeader();
-            await setupEnvironment();
-          } catch (error) {}
-        }, 3000);
       }
     }
     // checks every hour if the blockchain is still running
@@ -186,6 +178,18 @@
         }
       }
     });
+
+    // set an interval to check when Flextesa is started
+    checkIfFlextesaInterval = setInterval(async () => {
+      try {
+        await $store.Tezos.rpc.getBlockHeader();
+        if ($store.chainStatus !== "running") {
+          await setupEnvironment();
+        }
+      } catch (error) {
+        store.updateChainStatus("not_running");
+      }
+    }, 2000);
   });
 
   onDestroy(() => {

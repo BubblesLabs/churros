@@ -30,6 +30,14 @@ h1.title {
   color: $black;
 }
 
+a {
+  color: $dark-orange;
+
+  &:hover {
+    font-style: italic;
+  }
+}
+
 input[type="text"],
 input[type="number"] {
   padding: 10px 20px;

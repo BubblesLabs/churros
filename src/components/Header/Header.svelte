@@ -105,6 +105,7 @@
         color={$location.includes("/contracts") ? "#f39750" : "white"}
         width={28}
         height={28}
+        amount={undefined}
       />
       Contracts
     </a>

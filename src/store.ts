@@ -1,13 +1,7 @@
 import { writable } from "svelte/store";
 import type { TezosToolkit } from "@taquito/taquito";
 import type { BlockResponse } from "@taquito/rpc";
-import {
-  State,
-  TezosAccountAddress,
-  OriginationData,
-  Protocol,
-  TransactionData
-} from "./types";
+import { State, TezosAccountAddress, Protocol, TransactionData } from "./types";
 import config from "./config";
 
 const initialState: State = {

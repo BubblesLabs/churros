@@ -8,7 +8,6 @@
   import ContractIcon from "../Icons/ContractIcon.svelte";
   import TransactionsIcon from "../Icons/TransactionsIcon.svelte";
   import Modal from "../Modal/Modal.svelte";
-  import type { TezosContractAddress } from "../../types";
   import utils from "../../utils";
 
   let launchFlextesaModal = false;
@@ -117,11 +116,15 @@
             </div>
             <div>
               {#if Object.entries($contractsStore).find(([_, contract]) => contract.origination.level === block.header.level)}
-                {#each Object.entries($contractsStore).find(([_, contract]) => contract.origination.level === block.header.level) as contract}
-                  <a href={`#/contracts/${contract.address}`}>
-                    <ContractIcon color="#24292e" height={20} width={20} />
-                  </a>
-                {/each}
+                <ContractIcon
+                  color="#24292e"
+                  height={20}
+                  width={20}
+                  amount={Object.entries($contractsStore).find(
+                    ([_, contract]) =>
+                      contract.origination.level === block.header.level
+                  ).length}
+                />
               {/if}
               {#if checkForTransactionOps(block).length > 0}
                 {#each checkForTransactionOps(block) as hash}

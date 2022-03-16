@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import { fly } from "svelte/transition";
   import { BigMapAbstraction } from "@taquito/taquito";
+  import { Schema } from "@taquito/michelson-encoder";
   import BigNumber from "bignumber.js";
   import store from "../../store";
   import contractsStore from "../../contractsStore";
@@ -14,7 +15,48 @@
   let selectedContractStorage: Array<{ name: string; value: any }> = [];
   let bigmapSearchResults = {};
 
-  const parseStorage = (storage: any) => {
+  const findAnnotationType = (schema: any, annot: string): string | null => {
+    if (
+      schema.hasOwnProperty("prim") &&
+      schema.prim === "pair" &&
+      Array.isArray(schema.args)
+    ) {
+      let [res_a, res_b] = [
+        findAnnotationType(schema.args[0], annot),
+        findAnnotationType(schema.args[1], annot)
+      ];
+      if (res_a === null && res_b === null) {
+        return null;
+      } else if (res_a !== null && res_b !== null) {
+        // this case should not happen
+        console.error(
+          "Cannot have two annotation results in 'findAnnotationType'"
+        );
+        return null;
+      } else {
+        return res_a === null ? res_b : res_a;
+      }
+    } else {
+      if (
+        schema.hasOwnProperty("prim") &&
+        schema.hasOwnProperty("annots") &&
+        Array.isArray(schema.annots)
+      ) {
+        if (schema.annots[0] === "%" + annot) {
+          return schema.prim;
+        } else {
+          return null;
+        }
+      } else {
+        return null;
+      }
+    }
+  };
+
+  const parseStorage = async (contractAddress: string, storage: any) => {
+    const script = await $store.Tezos.rpc.getScript(contractAddress);
+    const storageSchema = Schema.fromRPCResponse({ script });
+
     Object.entries(storage).forEach(([name, value]) => {
       // bigmap
       if (value instanceof BigMapAbstraction) {
@@ -30,7 +72,13 @@
       }*/
       // potentially big number
       if (BigNumber.isBigNumber(value)) {
-        value = value.toNumber().toLocaleString();
+        // finds value type
+        const valType = findAnnotationType(storageSchema.val, name);
+        if (valType) {
+          value = `${value.toNumber().toLocaleString()} ${valType}`;
+        } else {
+          value = value.toNumber().toLocaleString();
+        }
       }
 
       const entry = { name, value };
@@ -68,7 +116,7 @@
       try {
         const contract = await $store.Tezos.contract.at(params.address);
         const contractStorage = await contract.storage();
-        parseStorage(contractStorage);
+        parseStorage(params.address, contractStorage);
       } catch (error) {
         console.error(error);
         store.updateToast({
@@ -93,7 +141,7 @@
   <div class="data-display-menu">
     {#if selectedContract && Object.entries($contractsStore).find(([addr, _]) => addr === selectedContract)}
       <button class="primary selected-data-display" disabled>
-        <ContractIcon color="white" width={24} height={24} />
+        <ContractIcon color="white" width={24} height={24} amount={undefined} />
         {utils.shortenHash(selectedContract)} (level {Object.entries(
           $contractsStore
         ).find(([addr, _]) => addr === selectedContract)[1].origination.level})
@@ -118,7 +166,7 @@
             try {
               const contract_ = await $store.Tezos.contract.at(contractAddress);
               const contractStorage = await contract_.storage();
-              parseStorage(contractStorage);
+              parseStorage(contractAddress, contractStorage);
             } catch (error) {
               console.error(error);
               store.updateToast({
