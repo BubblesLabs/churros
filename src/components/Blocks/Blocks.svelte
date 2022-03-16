@@ -10,6 +10,9 @@
 
   let selectedBlock: BlockResponse;
   let originatedContracts = [];
+  let keySearch = "";
+  let keySearchResult: undefined | boolean = undefined;
+  let lastKeySearch = { id: "", text: "" };
 
   const parseBlockInfo = (
     info: BlockFullHeader
@@ -18,9 +21,45 @@
     return infoTitles.map(title => ({ title, info: info[title] }));
   };
 
+  const searchKey = () => {
+    // unwrap the previous search
+    if (lastKeySearch.id) {
+      const el = document.getElementById(lastKeySearch.id);
+      el.innerHTML = lastKeySearch.text;
+    }
+
+    const sections = ["header", "metadata"];
+    const foundIds = sections
+      .map(section => {
+        const id = `${keySearch.trim()}-${section}-searchkey`;
+        const el = document.getElementById(id);
+        if (el) {
+          return id;
+        } else {
+          return undefined;
+        }
+      })
+      .filter(el => el);
+    if (foundIds.length > 0) {
+      keySearchResult = true;
+      // wraps the result in <mark> tags
+      const foundEl = foundIds[0];
+      const el = document.getElementById(foundEl);
+      const elInner = el.innerHTML;
+      lastKeySearch = { id: foundEl, text: elInner };
+      el.innerHTML = `<mark>${elInner}</mark>`;
+      // scroll to element
+      document.querySelector("#" + foundEl).scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+    } else {
+      keySearchResult = false;
+    }
+  };
+
   onMount(() => {
     if ($store.blocks && $store.blocks.length > 0 && params.blockHash) {
-      console.log($store.blocks);
       const block = $store.blocks.find(
         block => block.hash === params.blockHash
       );
@@ -52,6 +91,13 @@
     padding: $v-padding 40px;
     height: calc(100% - #{$v-padding} * 2);
     overflow: auto;
+
+    .search-keys {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 20px;
+    }
   }
 </style>
 
@@ -96,13 +142,29 @@
     <div class="general-container data-display-details">
       {#if selectedBlock}
         <h3>Block {selectedBlock.hash}</h3>
+        <div class="search-keys">
+          <div class="input-with-button">
+            <input
+              type="text"
+              placeholder="Search key"
+              bind:value={keySearch}
+              on:input={() => (keySearchResult = undefined)}
+            />
+            <button on:click={searchKey}> Search </button>
+          </div>
+          <div>
+            {#if keySearchResult !== undefined && keySearchResult === false}
+              No result
+            {/if}
+          </div>
+        </div>
         <div>
           <h4>Chain ID</h4>
           <div class="data-display-details__info">{selectedBlock.chain_id}</div>
           <h4>Header</h4>
           <div class="data-display-details__info">
             {#each parseBlockInfo(selectedBlock.header) as item}
-              <div>{item.title}</div>
+              <div id={`${item.title}-header-searchkey`}>{item.title}</div>
               <div>{item.info}</div>
             {/each}
           </div>
@@ -127,24 +189,8 @@
             </pre>
             -->
             {#each Object.entries(selectedBlock.metadata) as [metadataKey, metadataValue]}
-              <div>{metadataKey}</div>
-              <div>
-                {#if Array.isArray(metadataValue)}
-                  {JSON.stringify(metadataValue, null, 2)}
-                {:else if metadataValue && typeof metadataValue === "object" && !Array.isArray(metadataValue)}
-                  {#each Object.entries(metadataValue) as [metadataValueKey, metadataValueValue]}
-                    <div>
-                      {metadataValueKey}: {JSON.stringify(
-                        metadataValueValue,
-                        null,
-                        2
-                      )}
-                    </div>
-                  {/each}
-                {:else}
-                  {JSON.stringify(metadataValue, null, 2)}
-                {/if}
-              </div>
+              <div id={`${metadataKey}-metadata-searchkey`}>{metadataKey}</div>
+              {@html utils.json2html(metadataValue)}
             {/each}
           </div>
           <h4>Operations</h4>

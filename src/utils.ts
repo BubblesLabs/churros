@@ -1,10 +1,7 @@
 import type { BlockResponse } from "@taquito/rpc";
 import { OpKind } from "@taquito/taquito";
-import type {
-  TezosContractAddress,
-  OriginationData,
-  TransactionData
-} from "./types";
+import { validateAddress } from "@taquito/utils";
+import type { OriginationData, TransactionData } from "./types";
 
 const objHasProperty = (obj: any, property: string): boolean => {
   return (
@@ -55,11 +52,51 @@ const findNewTransactions = (block: BlockResponse): Array<TransactionData> => {
     .flat();
 };
 
+const json2html = (json: any): string => {
+  const padding = "padding:5px 0px 0px 20px";
+
+  if (json && Array.isArray(json)) {
+    // JSON array
+    if (json.length === 0) {
+      return `<div>[]</div>`;
+    }
+
+    return `<div>[ <div style="${padding}">${json
+      .map(el => json2html(el))
+      .join("")}</div> ]</div>`;
+  } else if (json && typeof json === "object" && !Array.isArray(json)) {
+    // JSON object
+    return `<div>{ ${Object.entries(json)
+      .map(
+        ([name, el]) =>
+          `<div style="${padding}"><span>${name}</span>: ${json2html(el)}</div>`
+      )
+      .join("")} }</div>`;
+  } else {
+    //other JSON value
+    if (json === undefined) {
+      return "undefined";
+    } else if (json === null) {
+      return "null";
+    } else if (typeof json === "boolean") {
+      return json ? "true" : "false";
+    } else {
+      if (validateAddress(json) === 3) {
+        // account address
+        return `<a hrel="#/accounts/${json}">${json}</a>`;
+      }
+
+      return json.toString();
+    }
+  }
+};
+
 export default {
   objHasProperty,
   shortenHash,
   isString,
   isNumber,
   checkForOriginationOps,
-  findNewTransactions
+  findNewTransactions,
+  json2html
 };

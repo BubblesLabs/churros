@@ -10,7 +10,7 @@
 
   const routes = {
     "/": Dashboard,
-    "/accounts": Accounts,
+    "/accounts/:address?": Accounts,
     "/blocks/:blockHash?": Blocks,
     "/transactions/:transaction?": Transactions,
     "/settings": Settings,

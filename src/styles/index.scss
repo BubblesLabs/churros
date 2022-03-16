@@ -32,6 +32,8 @@ h1.title {
 
 a {
   color: $dark-orange;
+  cursor: pointer;
+  text-decoration: underline;
 
   &:hover {
     font-style: italic;

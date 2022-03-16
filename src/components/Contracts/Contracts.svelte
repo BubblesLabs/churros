@@ -180,6 +180,7 @@
             color={contractAddress === selectedContract ? "white" : "#834112"}
             width={24}
             height={24}
+            amount={undefined}
           />
           {utils.shortenHash(contractAddress)} (level {data.origination.level})
         </button>
