@@ -12,6 +12,7 @@
   import config from "./config";
   import utils from "./utils";
   import { Protocol } from "./types";
+  import WebWorker from "worker-loader!./worker";
 
   let checkIfFlextesaInterval;
   let checkIfRunningInterval;
@@ -23,7 +24,42 @@
       const header = await $store.Tezos.rpc.getBlockHeader();
       if (header) {
         // Blockchain is online
-        store.updateBlockchainLaunched(true);
+        const webWorker = new WebWorker();
+        webWorker.postMessage({
+          type: "init",
+          payload: {
+            blockTime: $store.blockTime,
+            blocks: $store.blocks
+          }
+        });
+        webWorker.onmessage = msg => {
+          const { data } = msg;
+          if (data.type === "store-update") {
+            if (data.update === "reset") {
+              store.updateChainStatus("not_running");
+              store.updateChainDetails({
+                chainId: undefined,
+                protocolHash: undefined
+              });
+              store.updateCurrentLevel(undefined);
+              store.updateBlockchainLaunched(false);
+              store.updateBlockchainProtocol(Protocol.HANGZHOU);
+              store.resetBlocks();
+              contractsStore.reset();
+            } else if (data.update === "updateChainDetails") {
+              store[data.update]({ ...$store.chainDetails, ...data.payload });
+            } else {
+              // updates the store
+              store[data.update](data.payload);
+            }
+          } else if (data.type === "contracts-update") {
+            if (data.update === "addNewContract") {
+              contractsStore[data.update](...data.payload);
+            }
+          }
+        };
+
+        /*store.updateBlockchainLaunched(true);
         // chain_id
         if (utils.objHasProperty(header, "chain_id")) {
           store.updateChainDetails({
@@ -136,7 +172,7 @@
         });
         subscriber.on("close", () => {
           console.log("Taquito subscriber closed");
-        });
+        });*/
       }
     } catch (error) {
       console.error(error);
@@ -153,6 +189,7 @@
       signer: new InMemorySigner(config.accounts.alice.sk)
     });
     store.updateTezos(Tezos);
+
     // checks if flextesa is running
     try {
       // Flextesa is already running
@@ -184,7 +221,7 @@
       try {
         await $store.Tezos.rpc.getBlockHeader();
         if ($store.chainStatus !== "running") {
-          await setupEnvironment();
+          //await setupEnvironment();
         }
       } catch (error) {
         store.updateChainStatus("not_running");

@@ -129,7 +129,21 @@
             {#each Object.entries(selectedBlock.metadata) as [metadataKey, metadataValue]}
               <div>{metadataKey}</div>
               <div>
-                {JSON.stringify(metadataValue, null, 2)}
+                {#if Array.isArray(metadataValue)}
+                  {JSON.stringify(metadataValue, null, 2)}
+                {:else if metadataValue && typeof metadataValue === "object" && !Array.isArray(metadataValue)}
+                  {#each Object.entries(metadataValue) as [metadataValueKey, metadataValueValue]}
+                    <div>
+                      {metadataValueKey}: {JSON.stringify(
+                        metadataValueValue,
+                        null,
+                        2
+                      )}
+                    </div>
+                  {/each}
+                {:else}
+                  {JSON.stringify(metadataValue, null, 2)}
+                {/if}
               </div>
             {/each}
           </div>

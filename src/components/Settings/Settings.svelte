@@ -1,6 +1,6 @@
 <script lang="ts">
+  import { onMount, afterUpdate } from "svelte";
   import { MichelsonMap } from "@taquito/taquito";
-  import { afterUpdate } from "svelte";
   import config from "../../config";
   import store from "../../store";
   import Dropdown from "../Dropdown/Dropdown.svelte";
