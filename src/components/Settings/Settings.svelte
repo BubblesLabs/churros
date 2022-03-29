@@ -3,6 +3,7 @@
   import { MichelsonMap } from "@taquito/taquito";
   import config from "../../config";
   import store from "../../store";
+  import utils from "../../utils";
   import Dropdown from "../Dropdown/Dropdown.svelte";
   import { Protocol } from "../../types";
   import mockHarbingerCode from "./mockHarbingerCode";
@@ -12,6 +13,9 @@
   let startFlextesaCommand = "";
   let mockHarbingerValues = "XTZ-USD=5.67;BTC-USD=45000;ETH-USD=2876";
   let originatingOracle = false;
+  let originatingNewContract = false;
+  let newContractCode = "";
+  let newContractStorage = "";
 
   const copyToClipboard = async (text: string) => {
     if (!$store.toast.showToast) {
@@ -71,6 +75,116 @@
     }
   };
 
+  const originateNewContract = async () => {
+    // creates the storage needed by Taquito
+    const [storage, isValidJson] = (() => {
+      try {
+        return [JSON.parse(newContractStorage.trim()), true];
+      } catch (error) {
+        console.error(error);
+        return ["", false];
+      }
+    })();
+    if (!isValidJson) {
+      store.updateToast({
+        showToast: true,
+        toastText: "Invalid JSON provided for storage"
+      });
+      return;
+    } else {
+      // formats the provided value to fit Taquito format
+      const findMaps = storage => {
+        if (typeof storage === "object" && !Array.isArray(storage)) {
+          // value is an object
+          let emptyStorage = {};
+
+          Object.entries(storage).forEach(([key, value]: Array<any>) => {
+            if (
+              typeof value === "object" &&
+              value.hasOwnProperty("type") &&
+              value.hasOwnProperty("value") &&
+              ["map", "big_map"].includes(value.type) &&
+              Array.isArray(value.value)
+            ) {
+              if (value.value.length === 0) {
+                // empty map/big_map
+                emptyStorage[key] = new MichelsonMap();
+              } else {
+                const map = new MichelsonMap();
+                // populates the map/big_map
+                value.value.forEach(([key, value]) => {
+                  if (!isNaN(+key)) {
+                    // Taquito requires a string here
+                    key = key.toString();
+                  }
+
+                  map.set(key, findMaps(value));
+                });
+                emptyStorage[key] = map;
+              }
+            } else if (
+              typeof value === "object" &&
+              !value.hasOwnProperty("type")
+            ) {
+              let emptyObj = {};
+              const keyValuePairs = Object.entries(value);
+              keyValuePairs.forEach(([key, val]) => {
+                emptyObj[key] = findMaps(val);
+              });
+              emptyStorage[key] = emptyObj;
+            } else {
+              emptyStorage[key] = findMaps(value);
+            }
+          });
+
+          return emptyStorage;
+        } else {
+          return storage;
+        }
+      };
+      const formattedStorage = findMaps(storage);
+      // prepares origination
+      originatingNewContract = true;
+      try {
+        const originationOp = await $store.Tezos.contract.originate({
+          code: newContractCode.trim(),
+          storage: formattedStorage
+        });
+        await originationOp.confirmation();
+        // displays new contract address
+        store.updateToast({
+          showToast: true,
+          toastText: `New contract: <a href="#/contracts/${
+            originationOp.contractAddress
+          }">${utils.shortenHash(originationOp.contractAddress)}</a>`,
+          timeout: 6000
+        });
+      } catch (error) {
+        console.error(error);
+      } finally {
+        originatingNewContract = false;
+      }
+    }
+    /*
+    {
+      "ledger": {"type":"big_map", "value":[]},
+      "operators": {"type":"big_map", "value":[]},
+      "metadata": {"type":"big_map", "value":[[0, "5468697320697320612074657374"]]},
+      "token_metadata": {"type":"big_map", "value":[ [0, { "token_id": 0, "token_info": {"type":"big_map", "value":[ ["", "5468697320697320612074657374"] ]} }] ]},
+      "total_blogs": 0,
+      "admin": "tz1VSUr8wwNhLAzempoch5d6hLRiTh8Cjcjb",
+      "blogs": {"type":"big_map", "value":[]},
+      "post_fee": {
+        "5": 1000000,
+        "6": 10000000
+      },
+      "token_rewards": 15000000,
+      "total_supply": 0,
+      "total_fees": 0
+    }
+    */
+  };
+
   afterUpdate(async () => {
     startFlextesaCommand = `docker run --rm --name ${$store.blockchainProtocol}-sandbox --detach -p 20000:20000 --env flextesa_node_cors_origin='*' --env block_time=${$store.blockTime} oxheadalpha/flextesa:${config.defaultImageId} ${box} start --genesis random`;
   });
@@ -107,6 +221,9 @@
 
       & > div {
         padding: 10px;
+        width: 100%;
+        display: flex;
+        justify-content: space-around;
       }
     }
 
@@ -120,6 +237,10 @@
         display: flex;
         justify-content: center;
         align-items: center;
+      }
+
+      input[type="number"] {
+        width: 80px;
       }
     }
   }
@@ -202,12 +323,44 @@
       Originate a contract that mimics Harbinger's Normalizer contract to fetch
       currency pair prices on-chain.
     </div>
-    <div style="width:100%">
+    <div>
       <input type="text" style="width:70%" bind:value={mockHarbingerValues} />
     </div>
     <div>
       <button class="primary" on:click={originateMockHarbinger}>
         {#if originatingOracle}
+          Originating...
+        {:else}
+          Originate
+        {/if}
+      </button>
+    </div>
+  </div>
+  <div class="setting general-container">
+    <h3>Originate a new contract</h3>
+    <div>
+      Originate a new contract by inputting the Michelson code and the storage
+      below.
+    </div>
+    <div>
+      <textarea
+        placeholder="Michelson code"
+        rows="10"
+        style="width:70%"
+        bind:value={newContractCode}
+      />
+    </div>
+    <div>
+      <textarea
+        placeholder="Storage"
+        rows="10"
+        style="width:70%"
+        bind:value={newContractStorage}
+      />
+    </div>
+    <div>
+      <button class="primary" on:click={originateNewContract}>
+        {#if originatingNewContract}
           Originating...
         {:else}
           Originate

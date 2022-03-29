@@ -52,16 +52,18 @@ const state = {
   },
   updateToast: ({
     showToast,
-    toastText
+    toastText,
+    timeout = 4000
   }: {
     showToast: boolean;
     toastText: string;
+    timeout?: number;
   }) => {
     store.update(store => {
       if (showToast === true) {
         setTimeout(
           () => state.updateToast({ showToast: false, toastText: "" }),
-          4000
+          timeout
         );
       }
       return {

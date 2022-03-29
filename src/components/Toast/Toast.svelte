@@ -26,6 +26,6 @@
     class="toast"
     transition:fly={{ duration: 1000, y: 300, opacity: 1, easing: backInOut }}
   >
-    {$store.toast.toastText}
+    {@html $store.toast.toastText}
   </div>
 {/if}

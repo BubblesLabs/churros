@@ -12,7 +12,7 @@
   import config from "./config";
   import utils from "./utils";
   import { Protocol } from "./types";
-  import WebWorker from "worker-loader!./worker";
+  import WebWorker from "worker-loader!./web-worker/worker";
 
   let checkIfFlextesaInterval;
   let checkIfRunningInterval;
