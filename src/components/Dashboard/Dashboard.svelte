@@ -7,6 +7,7 @@
 
   let launchFlextesaModal = false;
   let liveBlocks;
+  let liveBlocksLimit = 100;
 
   const launchFlextesa = () => {
     launchFlextesaModal = !launchFlextesaModal;
@@ -14,7 +15,9 @@
 
   afterUpdate(() => {
     if ($store.db) {
-      liveBlocks = liveQuery(() => $store.db.blocks.reverse().toArray());
+      liveBlocks = liveQuery(() =>
+        $store.db.blocks.reverse().limit(liveBlocksLimit).toArray()
+      );
     }
   });
 </script>
@@ -60,7 +63,15 @@
 
 <div class="dashboard">
   {#if $store.blockchainLaunched && $liveBlocks}
-    <div class="blocks">
+    <div
+      class="blocks"
+      on:scroll={event => {
+        const element = event.target;
+        if (element.scrollHeight < element.scrollTop + 2000) {
+          liveBlocksLimit += 100;
+        }
+      }}
+    >
       {#each $liveBlocks as block (block.hash)}
         <Block {block} />
       {:else}

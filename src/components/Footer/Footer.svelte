@@ -24,7 +24,7 @@
   <div>Made by ©Bubbles Labs 2022</div>
   <div>
     <a
-      href="https://github.com/BubblesLabs/churros"
+      href="https://github.com/BubblesLabs/churros/tree/no-electron"
       target="_blank"
       rel="noopener noreferrer nofollow"
     >

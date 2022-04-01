@@ -367,9 +367,7 @@
   {#if $originatedContracts && $originatedContracts.length > 0}
     <div class="setting general-container">
       <h3>Reoriginate a contract</h3>
-      <div>
-        Originate a contract that you originated before on the same chain.
-      </div>
+      <div>Originate a contract that you originated before.</div>
       {#each $originatedContracts as contract, index}
         <div class="reoriginate">
           {index + 1}-
