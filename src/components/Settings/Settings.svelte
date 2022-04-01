@@ -1,11 +1,13 @@
 <script lang="ts">
-  import { onMount, afterUpdate } from "svelte";
+  import { afterUpdate } from "svelte";
   import { MichelsonMap } from "@taquito/taquito";
+  import { liveQuery } from "dexie";
   import config from "../../config";
   import store from "../../store";
   import utils from "../../utils";
   import Dropdown from "../Dropdown/Dropdown.svelte";
-  import { Protocol } from "../../types";
+  import { Protocol, TezosContractAddress } from "../../types";
+  import type { DbOriginatedContract } from "../../web-worker/dexie-wrapper";
   import mockHarbingerCode from "./mockHarbingerCode";
 
   let box = config.defaultBox;
@@ -16,6 +18,8 @@
   let originatingNewContract = false;
   let newContractCode = "";
   let newContractStorage = "";
+
+  let originatedContracts;
 
   const copyToClipboard = async (text: string) => {
     if (!$store.toast.showToast) {
@@ -159,6 +163,13 @@
           }">${utils.shortenHash(originationOp.contractAddress)}</a>`,
           timeout: 6000
         });
+        // saves the contract in the database
+        await $store.db.originatedContracts.add({
+          address: originationOp.contractAddress as TezosContractAddress,
+          chainId: $store.chainDetails.chainId,
+          code: newContractCode.trim(),
+          storage
+        });
       } catch (error) {
         console.error(error);
       } finally {
@@ -185,8 +196,19 @@
     */
   };
 
+  const reoriginate = async (contract: DbOriginatedContract) => {
+    newContractCode = contract.code;
+    newContractStorage = JSON.stringify(contract.storage, null, 2);
+  };
+
   afterUpdate(async () => {
     startFlextesaCommand = `docker run --rm --name ${$store.blockchainProtocol}-sandbox --detach -p 20000:20000 --env flextesa_node_cors_origin='*' --env block_time=${$store.blockTime} oxheadalpha/flextesa:${config.defaultImageId} ${box} start --genesis random`;
+
+    if ($store.db && originatedContracts === undefined) {
+      originatedContracts = liveQuery(() =>
+        $store.db.originatedContracts.toArray()
+      );
+    }
   });
 </script>
 
@@ -216,7 +238,7 @@
       text-align: center;
       display: flex;
       flex-direction: column;
-      justify-content: flex-start;
+      justify-content: center;
       align-items: center;
 
       & > div {
@@ -224,6 +246,12 @@
         width: 100%;
         display: flex;
         justify-content: space-around;
+      }
+
+      .reoriginate {
+        display: flex;
+        justify-content: center;
+        align-items: center;
       }
     }
 
@@ -336,6 +364,31 @@
       </button>
     </div>
   </div>
+  {#if $originatedContracts && $originatedContracts.length > 0}
+    <div class="setting general-container">
+      <h3>Reoriginate a contract</h3>
+      <div>
+        Originate a contract that you originated before on the same chain.
+      </div>
+      {#each $originatedContracts as contract, index}
+        <div class="reoriginate">
+          {index + 1}-
+          <a href={`#/contracts/${contract.address}`}>
+            {utils.shortenHash(contract.address)}
+          </a>
+          <button class="primary small" on:click={() => reoriginate(contract)}>
+            Copy-paste below
+          </button>
+          <button
+            class="primary small"
+            on:click={async () => {
+              await $store.db.originatedContracts.delete(contract.address);
+            }}>Delete</button
+          >
+        </div>
+      {/each}
+    </div>
+  {/if}
   <div class="setting general-container">
     <h3>Originate a new contract</h3>
     <div>

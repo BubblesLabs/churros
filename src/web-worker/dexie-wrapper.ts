@@ -1,4 +1,5 @@
 import Dexie, { Table } from "dexie";
+import type { TezosContractAddress } from "../types";
 
 export interface DbBlock {
   hash: string;
@@ -17,6 +18,13 @@ export interface DbContracts {
   };
 }
 
+export interface DbOriginatedContract {
+  address: TezosContractAddress;
+  chainId: string;
+  code: string;
+  storage: any;
+}
+
 export interface DbChainId {
   chainId: string;
   initTime: string;
@@ -27,16 +35,18 @@ export class DexieWrapper extends Dexie {
   // We just tell the typing system this is the case
   blocks!: Table<DbBlock>;
   contracts!: Table<DbContracts>;
+  originatedContracts!: Table<DbOriginatedContract>;
   chainId!: Table<DbChainId>;
   currentChainId: string;
 
   constructor(chainId: string) {
     super("churros-tz");
     // checks the current chainId in the database
-    this.version(2).stores({
+    this.version(3).stores({
       chainId: "++, chainId",
       blocks: "level, hash, chainId, timestamp, operationsCount",
-      contracts: "address, originationLevel, storageSnapshots"
+      contracts: "address, originationLevel, storageSnapshots",
+      originatedContracts: "++id, address, chainId, code, storage"
     });
     this.currentChainId = chainId;
   }

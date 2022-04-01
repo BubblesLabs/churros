@@ -27,6 +27,11 @@ button {
     font-size: 1.5rem;
   }
 
+  &.small {
+    font-size: 0.9rem;
+    padding: 5px 10px;
+  }
+
   &.dropdown {
     background-color: $yellow;
     border: solid 1px $dark-orange;

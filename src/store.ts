@@ -100,7 +100,7 @@ const state = {
   resetBlocks: () => store.update(store => ({ ...store, blocks: [] })),
   addNewTransactions: (transactions: Array<TransactionData>) =>
     store.update(store => {
-      if (store.transactions.length < 100) {
+      if (store.transactions && store.transactions.length < 100) {
         return {
           ...store,
           transactions: [...transactions, ...store.transactions]
