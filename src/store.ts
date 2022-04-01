@@ -2,6 +2,7 @@ import { writable } from "svelte/store";
 import type { TezosToolkit } from "@taquito/taquito";
 import type { BlockResponse } from "@taquito/rpc";
 import { State, TezosAccountAddress, Protocol, TransactionData } from "./types";
+import type { DexieWrapper } from "./web-worker/dexie-wrapper";
 import config from "./config";
 
 const initialState: State = {
@@ -19,7 +20,8 @@ const initialState: State = {
     showToast: false,
     toastText: ""
   },
-  transactions: []
+  transactions: [],
+  db: undefined
 };
 
 const store = writable(initialState);
@@ -81,7 +83,10 @@ const state = {
   addNewBlock: (block: BlockResponse) =>
     store.update(store => {
       // checks if block hasn't been added yet
-      if (!store.blocks.find(_block => _block.hash === block.hash)) {
+      if (
+        store.blocks &&
+        !store.blocks.find(_block => _block.hash === block.hash)
+      ) {
         if (store.blocks.length < 100) {
           return { ...store, blocks: [block, ...store.blocks] };
         } else {
@@ -106,7 +111,19 @@ const state = {
 
         return { ...store, transactions: [...transactions, ...newTxsStore] };
       }
-    })
+    }),
+  updateDbInstance: (db: DexieWrapper) => {
+    store.update(store => {
+      if (!store.db) {
+        return {
+          ...store,
+          db
+        };
+      } else {
+        return store;
+      }
+    });
+  }
 };
 
 export default state;

@@ -1,10 +1,29 @@
 import { TezosToolkit } from "@taquito/taquito";
+import type { BlockResponse } from "@taquito/rpc";
 import { Protocol } from "../types";
 import utils from "../utils";
 import config from "../config";
-import { db } from "./dexie-wrapper";
+import { initDb } from "./dexie-wrapper";
+import type { DexieWrapper } from "./dexie-wrapper";
 
 const ctx: Worker = self as any;
+let db: DexieWrapper;
+
+const addBlockToDb = async (block: BlockResponse) => {
+  try {
+    if ((await db.blocks.count()) < 10_000) {
+      const res = await db.blocks.put({
+        level: block.header.level,
+        hash: block.hash,
+        chainId: block.chain_id,
+        timestamp: block.header.timestamp as string,
+        operationsCount: block.operations.filter(op => op.length > 0).length
+      });
+    }
+  } catch (error) {
+    console.error(error);
+  }
+};
 
 ctx.onmessage = async ev => {
   const msg = ev.data;
@@ -49,12 +68,14 @@ ctx.onmessage = async ev => {
         payload: undefined
       });
     }
-    // updates Tquito polling interval
+    // updates Taquito polling interval
     Tezos.setProvider({
       config: {
         streamerPollingIntervalMilliseconds: blockTime * 1000
       }
     });
+    // initializes database
+    db = await initDb(header.chain_id);
     // subscribes to new blocks
     const subscriber = Tezos.stream.subscribe("head");
     subscriber.on("data", async blockHash => {
@@ -122,6 +143,7 @@ ctx.onmessage = async ev => {
         }
         // saves new block
         // TODO: for now, saved locally, but database should be set
+        addBlockToDb(block);
         ctx.postMessage({
           type: "store-update",
           update: "addNewBlock",

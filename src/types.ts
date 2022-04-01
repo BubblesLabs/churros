@@ -1,5 +1,6 @@
 import type { TezosToolkit } from "@taquito/taquito";
 import type { BlockResponse } from "@taquito/rpc";
+import type { DexieWrapper } from "./web-worker/dexie-wrapper";
 
 export type TezosContractAddress = `KT1${string}`;
 export type TezosAccountAddress = `tz${"1" | "2" | "3"}${string}`;
@@ -154,6 +155,7 @@ export interface State {
     toastText: string;
   };
   transactions: Array<TransactionData>;
+  db: DexieWrapper | undefined;
 }
 
 export interface ContractSessionStorage {
