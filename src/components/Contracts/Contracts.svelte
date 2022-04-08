@@ -3,6 +3,7 @@
   import { fly } from "svelte/transition";
   import { BigMapAbstraction } from "@taquito/taquito";
   import { Schema } from "@taquito/michelson-encoder";
+  import { bytes2Char } from "@taquito/utils";
   import BigNumber from "bignumber.js";
   import store from "../../store";
   import contractsStore from "../../contractsStore";
@@ -70,15 +71,17 @@
       /*if (Array.isArray(value)) {
         value = `[ ${value.map(v => v)} ]`;
       }*/
+      const valType = findAnnotationType(storageSchema.val, name);
       // potentially big number
       if (BigNumber.isBigNumber(value)) {
         // finds value type
-        const valType = findAnnotationType(storageSchema.val, name);
         if (valType) {
-          value = `${value.toNumber().toLocaleString()} ${valType}`;
+          value = `${value.toNumber().toLocaleString()} (${valType})`;
         } else {
           value = value.toNumber().toLocaleString();
         }
+      } else if (valType === "bytes" && typeof value === "string") {
+        value = `${bytes2Char(value)} (bytes)`;
       }
 
       const entry = { name, value };
@@ -224,6 +227,8 @@
                   {#each entry.value as item, index}
                     <div>{index}- {item}</div>
                   {/each}
+                {:else if typeof entry.value === "object" && Object.keys(entry.value).length > 0}
+                  {JSON.stringify(entry.value, null, 2)}
                 {:else}
                   {entry.value}
                 {/if}
