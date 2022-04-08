@@ -15,6 +15,7 @@
   let selectedContract = "";
   let selectedContractStorage: Array<{ name: string; value: any }> = [];
   let bigmapSearchResults = {};
+  let entrypoints: Array<{ name: string }> = [];
 
   const findAnnotationType = (schema: any, annot: string): string | null => {
     if (
@@ -120,6 +121,15 @@
         const contract = await $store.Tezos.contract.at(params.address);
         const contractStorage = await contract.storage();
         parseStorage(params.address, contractStorage);
+        entrypoints = [
+          ...Object.keys(contract.entrypoints.entrypoints)
+            .map(key => ({
+              name: key
+            }))
+            .sort((a, b) => {
+              return a.name > b.name ? 1 : b.name > a.name ? -1 : 0;
+            })
+        ];
       } catch (error) {
         console.error(error);
         store.updateToast({
@@ -196,6 +206,13 @@
     <div class="general-container data-display-details">
       {#if selectedContract && selectedContractStorage}
         <h3>Contract {selectedContract}</h3>
+        <h4>- Entrypoints</h4>
+        <div>
+          {#each entrypoints as entrypoint}
+            <div>{entrypoint.name}</div>
+          {/each}
+        </div>
+        <h4>- Storage</h4>
         <div>
           {#each selectedContractStorage as entry}
             <div class="data-display-details__info" style="margin-bottom:10px">
